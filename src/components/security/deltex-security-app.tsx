@@ -580,13 +580,13 @@ function Card({
   const shadowColor = glow || colors.shadow;
   const shadowStyle =
     Platform.OS === 'web'
-      ? ({ boxShadow: `0 14px 28px ${shadowColor}` } as object)
+      ? ({ boxShadow: `0 10px 26px ${hexWithAlpha(colors.mode === 'dark' ? '#000000' : '#171714', colors.mode === 'dark' ? '44' : '16')}` } as object)
       : ({
           shadowColor,
-          shadowOpacity: 0.14,
-          shadowRadius: 22,
-          shadowOffset: { width: 0, height: 12 },
-          elevation: 4,
+          shadowOpacity: 0.08,
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: 8 },
+          elevation: 2,
         } as object);
 
   return (
@@ -624,12 +624,12 @@ function GradientButton({
   return (
     <Pressable onPress={disabled ? undefined : onPress} accessibilityRole="button" style={[{ opacity: disabled ? 0.55 : 1 }, style]}>
       <LinearGradient
-        colors={[colors.primary, colors.accent]}
+        colors={[colors.primary, colors.success]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradientButton}
       >
-        {Icon ? <Icon size={18} color="#041014" strokeWidth={2.5} /> : null}
+        {Icon ? <Icon size={18} color="#050505" strokeWidth={2.5} /> : null}
         <Text style={styles.gradientButtonText}>{label}</Text>
       </LinearGradient>
     </Pressable>
@@ -660,7 +660,7 @@ function OutlineButton({
       accessibilityRole="button"
       style={[
         styles.outlineButton,
-        { borderColor: hexWithAlpha(accent, '55'), backgroundColor: hexWithAlpha(accent, '12'), opacity: disabled ? 0.55 : 1 },
+        { borderColor: hexWithAlpha(accent, '55'), backgroundColor: colors.cardAlt, opacity: disabled ? 0.55 : 1 },
         style,
       ]}
     >
@@ -4591,13 +4591,11 @@ function BottomNavigation({ screen, onNavigate }: { screen: AppScreen; onNavigat
 
 function CyberBackground({ children, variant = 'cyan' }: { children: React.ReactNode; variant?: 'cyan' | 'purple' }) {
   const { colors } = useDeltexTheme();
-  const glow = variant === 'purple' ? colors.purple : colors.primary;
+  const finalStop = variant === 'purple' ? colors.cardAlt : colors.backgroundSoft;
   const noPointerEvents = { pointerEvents: 'none' as const };
 
   return (
-    <LinearGradient colors={[colors.background, colors.background, hexWithAlpha(glow, colors.mode === 'dark' ? '08' : '03')]} style={styles.appGradient}>
-      {colors.mode === 'dark' ? <View style={[styles.bgGlowTop, noPointerEvents, { backgroundColor: hexWithAlpha(glow, '12') }]} /> : null}
-      <View style={[styles.bgGlowRight, noPointerEvents, { backgroundColor: hexWithAlpha(colors.accent, colors.mode === 'dark' ? '10' : '06') }]} />
+    <LinearGradient colors={[colors.background, colors.background, finalStop]} style={styles.appGradient}>
       <View style={[styles.bgGrid, noPointerEvents, { borderColor: colors.border }]} />
       {children}
     </LinearGradient>
@@ -4740,13 +4738,13 @@ const styles = StyleSheet.create({
   },
   bgGrid: {
     position: 'absolute',
-    left: 18,
-    right: 18,
-    top: 88,
-    bottom: 88,
+    left: 14,
+    right: 14,
+    top: 72,
+    bottom: 78,
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 32,
-    opacity: 0.18,
+    borderRadius: 18,
+    opacity: 0.36,
   },
   safeArea: {
     flex: 1,
@@ -4772,9 +4770,9 @@ const styles = StyleSheet.create({
   },
   card: {
     borderWidth: 1,
-    borderRadius: 20,
-    padding: 13,
-    marginBottom: 11,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
   },
   particle: {
     position: 'absolute',
@@ -4826,8 +4824,8 @@ const styles = StyleSheet.create({
     borderRadius: 7,
   },
   gradientButton: {
-    minHeight: 48,
-    borderRadius: 16,
+    minHeight: 46,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
@@ -4835,7 +4833,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   gradientButtonText: {
-    color: '#041014',
+    color: '#050505',
     fontSize: 12,
     fontWeight: '900',
     letterSpacing: 0.7,
@@ -4843,7 +4841,7 @@ const styles = StyleSheet.create({
   },
   outlineButton: {
     minHeight: 38,
-    borderRadius: 13,
+    borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: 11,
     alignItems: 'center',
@@ -5151,7 +5149,7 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     borderWidth: 1,
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 14,
     marginBottom: 11,
   },
@@ -5572,7 +5570,7 @@ const styles = StyleSheet.create({
   },
   searchShell: {
     minHeight: 46,
-    borderRadius: 15,
+    borderRadius: 12,
     borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -5582,7 +5580,7 @@ const styles = StyleSheet.create({
   },
   coverageHero: {
     borderWidth: 1,
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 13,
     marginBottom: 11,
   },
@@ -5622,7 +5620,7 @@ const styles = StyleSheet.create({
     flexBasis: '48%',
     flexGrow: 1,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
@@ -5689,7 +5687,7 @@ const styles = StyleSheet.create({
   },
   detailHero: {
     borderWidth: 1,
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 13,
     marginBottom: 11,
     flexDirection: 'row',
@@ -5834,6 +5832,7 @@ const styles = StyleSheet.create({
   chatPanel: {
     padding: 0,
     overflow: 'hidden',
+    borderRadius: 16,
   },
   chatHeader: {
     minHeight: 58,
@@ -5937,16 +5936,16 @@ const styles = StyleSheet.create({
   },
   messageBubble: {
     maxWidth: '82%',
-    borderRadius: 16,
+    borderRadius: 14,
     paddingHorizontal: 11,
     paddingVertical: 9,
   },
   aiBubble: {
     borderWidth: 1,
-    borderTopLeftRadius: 5,
+    borderTopLeftRadius: 6,
   },
   userBubble: {
-    borderTopRightRadius: 5,
+    borderTopRightRadius: 6,
   },
   aiMessageText: {
     fontSize: 11,
@@ -6165,12 +6164,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   profileHeader: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   profileAvatar: {
     width: 66,
     height: 66,
-    borderRadius: 23,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -6179,7 +6178,7 @@ const styles = StyleSheet.create({
   profilePhotoImage: {
     width: 66,
     height: 66,
-    borderRadius: 23,
+    borderRadius: 18,
   },
   profileAvatarText: {
     color: '#041014',
@@ -6765,7 +6764,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderTopWidth: 1,
-    paddingTop: 9,
+    paddingTop: 8,
     paddingBottom: Platform.select({ ios: 24, android: 14, default: 14 }),
     paddingHorizontal: 10,
     flexDirection: 'row',
@@ -6779,7 +6778,7 @@ const styles = StyleSheet.create({
   navIconShell: {
     width: 34,
     height: 30,
-    borderRadius: 12,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },

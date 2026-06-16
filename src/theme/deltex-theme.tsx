@@ -39,48 +39,48 @@ const THEME_KEY = 'deltex_ai_theme_preference';
 
 const DARK: ThemePalette = {
   mode: 'dark',
-  background: '#0a0c12',
-  backgroundSoft: '#0d1018',
-  surface: '#111420',
-  surfaceStrong: '#161929',
-  card: '#111420',
-  cardAlt: '#1a1f30',
-  text: '#e8eaf0',
-  textMuted: '#9aa3b8',
-  textSubtle: '#6b7280',
-  border: 'rgba(0,212,255,0.12)',
-  primary: '#00d4ff',
-  accent: '#0ff4c6',
-  danger: '#ff3b5c',
-  warning: '#f59e0b',
-  success: '#22c55e',
-  purple: '#7c3aed',
-  shadow: 'rgba(0,212,255,0.35)',
-  input: '#161929',
-  tab: 'rgba(10,12,18,0.94)',
+  background: '#08080a',
+  backgroundSoft: '#0d0d11',
+  surface: '#111114',
+  surfaceStrong: '#18181d',
+  card: '#111114',
+  cardAlt: '#17171c',
+  text: '#f4f2ed',
+  textMuted: '#b7b2a8',
+  textSubtle: '#7a766e',
+  border: 'rgba(255,255,255,0.10)',
+  primary: '#78f27f',
+  accent: '#c084fc',
+  danger: '#ff6b7a',
+  warning: '#facc15',
+  success: '#7ee787',
+  purple: '#a78bfa',
+  shadow: 'rgba(126,231,135,0.22)',
+  input: '#16161a',
+  tab: 'rgba(8,8,10,0.92)',
 };
 
 const LIGHT: ThemePalette = {
   mode: 'light',
-  background: '#f6fbff',
-  backgroundSoft: '#eef7ff',
+  background: '#f7f6f2',
+  backgroundSoft: '#efeee8',
   surface: '#ffffff',
-  surfaceStrong: '#e9f5ff',
+  surfaceStrong: '#eeece5',
   card: '#ffffff',
-  cardAlt: '#f4f8ff',
-  text: '#07111f',
-  textMuted: '#475569',
-  textSubtle: '#718096',
-  border: 'rgba(0,106,166,0.16)',
-  primary: '#006dff',
-  accent: '#02bfa6',
+  cardAlt: '#f3f1eb',
+  text: '#171714',
+  textMuted: '#5f5b52',
+  textSubtle: '#8b867a',
+  border: 'rgba(23,23,20,0.12)',
+  primary: '#198f3b',
+  accent: '#7c3aed',
   danger: '#dc2626',
-  warning: '#d97706',
-  success: '#059669',
+  warning: '#b7791f',
+  success: '#15803d',
   purple: '#6d28d9',
-  shadow: 'rgba(0,109,255,0.22)',
-  input: '#edf6ff',
-  tab: 'rgba(255,255,255,0.94)',
+  shadow: 'rgba(25,143,59,0.16)',
+  input: '#f1efe8',
+  tab: 'rgba(247,246,242,0.94)',
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -106,7 +106,7 @@ async function setStoredPreference(preference: ThemePreference) {
 
 export function DeltexThemeProvider({ children }: { children: ReactNode }) {
   const systemScheme = useColorScheme();
-  const [preference, setPreferenceState] = useState<ThemePreference>('light');
+  const [preference, setPreferenceState] = useState<ThemePreference>('dark');
 
   useEffect(() => {
     let mounted = true;
