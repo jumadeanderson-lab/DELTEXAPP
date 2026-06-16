@@ -1880,18 +1880,27 @@ function DashboardScreen({
 
   return (
     <ScrollScreen>
-      <View style={styles.dashboardHeader}>
+      <View style={[styles.railwayTopNav, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <BrandLogo compact />
-        <Pressable onPress={() => onNavigate('profile')} style={[styles.avatar, { backgroundColor: colors.primary }]}>
-          {profile?.photoUri ? (
-            <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} />
-          ) : (
-            <Text style={styles.avatarText}>{(profile?.displayName || user?.name || 'DA').slice(0, 2).toUpperCase()}</Text>
-          )}
-        </Pressable>
+        <View style={styles.railwayNavLinks}>
+          {['Product', 'Developers', 'Enterprise', 'Pricing'].map((item) => (
+            <Text key={item} style={[styles.railwayNavLink, { color: colors.textMuted }]}>
+              {item}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.railwayNavActions}>
+          <OutlineButton label="Scan" onPress={refreshSecurityScore} icon={RefreshCw} color={colors.primary} />
+          <Pressable onPress={() => onNavigate('profile')} style={[styles.avatar, { backgroundColor: colors.primary }]}>
+            {profile?.photoUri ? (
+              <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>{(profile?.displayName || user?.name || 'DA').slice(0, 2).toUpperCase()}</Text>
+            )}
+          </Pressable>
+        </View>
       </View>
 
-      <SecurityScoreCard model={securityScore} onRefresh={refreshSecurityScore} />
       {refreshing ? (
         <Card style={styles.refreshCard}>
           <View style={styles.refreshRow}>
@@ -1906,21 +1915,46 @@ function DashboardScreen({
       ) : null}
 
       <LinearGradient colors={[colors.card, colors.cardAlt]} style={[styles.heroCard, { borderColor: colors.border }]}>
-        <View style={styles.heroTopRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.heroEyebrow, { color: colors.accent }]}>Live protection</Text>
-            <Text style={[styles.heroTitle, { color: colors.text }]}>Security command center</Text>
-            <Text style={[styles.heroCopy, { color: colors.textMuted }]}>
-              Your AI shield blocked {securityScore.blockedThreats} threats and is monitoring identity, scams, network, and device risk in real time.
+        <View style={styles.railwayHeroGrid}>
+          <View style={styles.railwayHeroCopy}>
+            <View style={[styles.railwayHeroBadge, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+              <Text style={[styles.railwayHeroBadgeText, { color: colors.primary }]}>Deltex AI platform</Text>
+            </View>
+            <Text style={[styles.railwayHeroTitle, { color: colors.text }]}>Ship security peacefully</Text>
+            <Text style={[styles.railwayHeroSubtitle, { color: colors.textMuted }]}>
+              Deploy family safety, website protection, identity monitoring, malware defense, and AI investigations from one clean command center.
             </Text>
+            <View style={styles.heroActions}>
+              <GradientButton label="Deploy Protection" onPress={refreshSecurityScore} icon={ShieldCheck} style={styles.heroAction} />
+              <OutlineButton label="View Dashboard" onPress={() => onNavigate('protection')} icon={ArrowRight} color={colors.text} style={styles.heroAction} />
+            </View>
           </View>
-          <ScoreRing score={securityScore.score} color={colors.primary} size={126} />
-        </View>
-        <View style={styles.heroActions}>
-          <OutlineButton label="Run Scan" onPress={refreshSecurityScore} icon={RefreshCw} color={colors.primary} style={styles.heroAction} />
-          <OutlineButton label="Ask AI" onPress={() => onNavigate('assistant')} icon={Brain} color={colors.accent} style={styles.heroAction} />
+          <View style={[styles.railwayProjectPanel, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <View style={styles.railwayPanelHeader}>
+              <View>
+                <Text style={[styles.railwayPanelTitle, { color: colors.text }]}>Deltex production</Text>
+                <Text style={[styles.railwayPanelMeta, { color: colors.textMuted }]}>Healthy deployment</Text>
+              </View>
+              <ScoreRing score={securityScore.score} color={colors.primary} size={78} />
+            </View>
+            {[
+              { label: 'Deploy', value: 'Protections active', color: colors.primary },
+              { label: 'Network', value: 'Threat routes watched', color: colors.success },
+              { label: 'Scale', value: `${securityScore.filesScanned} files scanned`, color: colors.purple },
+              { label: 'Monitor', value: `${securityScore.blockedThreats} blocked`, color: colors.warning },
+              { label: 'Evolve', value: securityScore.trend, color: colors.accent },
+            ].map((row) => (
+              <View key={row.label} style={[styles.railwayDeployRow, { borderTopColor: colors.border }]}>
+                <View style={[styles.railwayDeployDot, { backgroundColor: row.color }]} />
+                <Text style={[styles.railwayDeployLabel, { color: colors.text }]}>{row.label}</Text>
+                <Text style={[styles.railwayDeployValue, { color: colors.textMuted }]}>{row.value}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       </LinearGradient>
+
+      <SecurityScoreCard model={securityScore} onRefresh={refreshSecurityScore} />
 
       <PlanAccessCard onUpgrade={() => onNavigate('subscriptions')} />
       <TokenWalletCard onManage={() => onNavigate('tokens')} />
@@ -5130,6 +5164,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 18,
   },
+  railwayTopNav: {
+    minHeight: 58,
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  railwayNavLinks: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 18,
+    flexWrap: 'wrap',
+  },
+  railwayNavLink: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  railwayNavActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   avatar: {
     width: 42,
     height: 42,
@@ -5149,9 +5211,91 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     borderWidth: 1,
+    borderRadius: 22,
+    padding: 18,
+    marginBottom: 12,
+  },
+  railwayHeroGrid: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 16,
+    flexWrap: 'wrap',
+  },
+  railwayHeroCopy: {
+    flex: 1,
+    minWidth: 280,
+    justifyContent: 'center',
+    paddingVertical: 6,
+  },
+  railwayHeroBadge: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 18,
+  },
+  railwayHeroBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.4,
+  },
+  railwayHeroTitle: {
+    fontSize: 40,
+    lineHeight: 44,
+    fontWeight: '900',
+    letterSpacing: -1.6,
+  },
+  railwayHeroSubtitle: {
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 14,
+    maxWidth: 560,
+  },
+  railwayProjectPanel: {
+    flexGrow: 1,
+    flexBasis: 310,
+    borderWidth: 1,
     borderRadius: 18,
     padding: 14,
-    marginBottom: 11,
+  },
+  railwayPanelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 10,
+  },
+  railwayPanelTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  railwayPanelMeta: {
+    fontSize: 10,
+    fontWeight: '800',
+    marginTop: 3,
+  },
+  railwayDeployRow: {
+    minHeight: 42,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  railwayDeployDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 8,
+  },
+  railwayDeployLabel: {
+    width: 64,
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  railwayDeployValue: {
+    flex: 1,
+    fontSize: 10,
+    fontWeight: '700',
   },
   heroTopRow: {
     flexDirection: 'row',
