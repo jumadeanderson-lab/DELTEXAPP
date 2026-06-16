@@ -272,19 +272,19 @@ const LANGUAGE_OPTIONS = [
 const OCCUPATION_OPTIONS = ['Security Manager', 'Parent or Guardian', 'Founder', 'Developer', 'Student', 'Analyst', 'Business Owner', 'IT Administrator', 'Creator', 'Other'];
 
 const vulnerabilityCoverage = [
-  { label: 'Public-facing vulns', level: 'Strong', icon: Search, color: '#00d4ff' },
-  { label: 'Credential theft', level: 'Strong', icon: KeyRound, color: '#0ff4c6' },
-  { label: 'Phishing & BEC', level: 'Strong', icon: AlertTriangle, color: '#f59e0b' },
-  { label: 'Ransomware', level: 'Strong', icon: ShieldAlert, color: '#ff3b5c' },
-  { label: 'Cloud identity abuse', level: 'Strong', icon: Fingerprint, color: '#7c3aed' },
-  { label: 'Misconfiguration', level: 'Strong', icon: Settings, color: '#00d4ff' },
-  { label: 'Supply chain / CI-CD', level: 'Meaningful', icon: Database, color: '#0ff4c6' },
-  { label: 'IoT / OT / BMS', level: 'Meaningful', icon: Network, color: '#f59e0b' },
-  { label: 'Privacy / PII leakage', level: 'Meaningful', icon: Eye, color: '#7c3aed' },
-  { label: 'LLM prompt injection', level: 'AI guarded', icon: Brain, color: '#ff3b5c' },
-  { label: 'Child safety scams', level: 'Guardian guarded', icon: Users, color: '#0ff4c6' },
-  { label: 'Website posture drift', level: 'Baseline watched', icon: Globe, color: '#00d4ff' },
-  { label: 'Personal firewall rules', level: 'Policy guarded', icon: ShieldCheck, color: '#ff3b5c' },
+  { label: 'Public-facing vulns', level: 'Strong', icon: Search, color: '#7ee787' },
+  { label: 'Credential theft', level: 'Strong', icon: KeyRound, color: '#95d475' },
+  { label: 'Phishing & BEC', level: 'Strong', icon: AlertTriangle, color: '#f2cc60' },
+  { label: 'Ransomware', level: 'Strong', icon: ShieldAlert, color: '#ff7b72' },
+  { label: 'Cloud identity abuse', level: 'Strong', icon: Fingerprint, color: '#a78bfa' },
+  { label: 'Misconfiguration', level: 'Strong', icon: Settings, color: '#7ee787' },
+  { label: 'Supply chain / CI-CD', level: 'Meaningful', icon: Database, color: '#95d475' },
+  { label: 'IoT / OT / BMS', level: 'Meaningful', icon: Network, color: '#f2cc60' },
+  { label: 'Privacy / PII leakage', level: 'Meaningful', icon: Eye, color: '#a78bfa' },
+  { label: 'LLM prompt injection', level: 'AI guarded', icon: Brain, color: '#ff7b72' },
+  { label: 'Child safety scams', level: 'Guardian guarded', icon: Users, color: '#95d475' },
+  { label: 'Website posture drift', level: 'Baseline watched', icon: Globe, color: '#7ee787' },
+  { label: 'Personal firewall rules', level: 'Policy guarded', icon: ShieldCheck, color: '#ff7b72' },
 ];
 
 const PLAN_CAPABILITIES: Record<PlanId, string[]> = {
@@ -297,29 +297,29 @@ const PLAN_CAPABILITIES: Record<PlanId, string[]> = {
 };
 
 const TOKEN_OPERATIONS = [
-  { title: 'Deep malware scan', detail: 'Full device and file behavior review', tokens: 8, minPlan: 'free' as PlanId, icon: Bug, color: '#ff3b5c' },
-  { title: 'Fraud investigation', detail: 'Payment, profile, and conversation analysis', tokens: 18, minPlan: 'professional' as PlanId, icon: CreditCard, color: '#f59e0b' },
-  { title: 'Dark web analysis', detail: 'Breach, credential, alias, and card exposure review', tokens: 16, minPlan: 'premium' as PlanId, icon: Eye, color: '#7c3aed' },
-  { title: 'Security audit', detail: 'Device, account, privacy, and network posture audit', tokens: 24, minPlan: 'business' as PlanId, icon: BarChart3, color: '#00d4ff' },
-  { title: 'Detailed report', detail: 'Exportable AI risk report with recommendations', tokens: 12, minPlan: 'premium' as PlanId, icon: FileText, color: '#0ff4c6' },
-  { title: 'Family safety review', detail: 'Guardian-approved conversation, contact, and youth scam risk analysis', tokens: 14, minPlan: 'family' as PlanId, icon: Users, color: '#0ff4c6' },
-  { title: 'Social profile sweep', detail: 'Linked account, fake profile, impersonation, and scam campaign review', tokens: 12, minPlan: 'family' as PlanId, icon: MessageSquare, color: '#00d4ff' },
-  { title: 'Website baseline', detail: 'SSL/TLS, DNS, headers, reputation, content drift, and exposure review', tokens: 20, minPlan: 'premium' as PlanId, icon: Globe, color: '#00d4ff' },
-  { title: 'Firewall policy tune-up', detail: 'Malicious links, risky domains, downloads, network filters, and policy recommendations', tokens: 10, minPlan: 'premium' as PlanId, icon: ShieldCheck, color: '#ff3b5c' },
+  { title: 'Deep malware scan', detail: 'Full device and file behavior review', tokens: 8, minPlan: 'free' as PlanId, icon: Bug, color: '#ff7b72' },
+  { title: 'Fraud investigation', detail: 'Payment, profile, and conversation analysis', tokens: 18, minPlan: 'professional' as PlanId, icon: CreditCard, color: '#f2cc60' },
+  { title: 'Dark web analysis', detail: 'Breach, credential, alias, and card exposure review', tokens: 16, minPlan: 'premium' as PlanId, icon: Eye, color: '#a78bfa' },
+  { title: 'Security audit', detail: 'Device, account, privacy, and network posture audit', tokens: 24, minPlan: 'business' as PlanId, icon: BarChart3, color: '#7ee787' },
+  { title: 'Detailed report', detail: 'Exportable AI risk report with recommendations', tokens: 12, minPlan: 'premium' as PlanId, icon: FileText, color: '#95d475' },
+  { title: 'Family safety review', detail: 'Guardian-approved conversation, contact, and youth scam risk analysis', tokens: 14, minPlan: 'family' as PlanId, icon: Users, color: '#95d475' },
+  { title: 'Social profile sweep', detail: 'Linked account, fake profile, impersonation, and scam campaign review', tokens: 12, minPlan: 'family' as PlanId, icon: MessageSquare, color: '#7ee787' },
+  { title: 'Website baseline', detail: 'SSL/TLS, DNS, headers, reputation, content drift, and exposure review', tokens: 20, minPlan: 'premium' as PlanId, icon: Globe, color: '#7ee787' },
+  { title: 'Firewall policy tune-up', detail: 'Malicious links, risky domains, downloads, network filters, and policy recommendations', tokens: 10, minPlan: 'premium' as PlanId, icon: ShieldCheck, color: '#ff7b72' },
 ];
 
 const SCHEDULED_SECURITY_OPERATIONS = [
-  { title: 'Malware scan', detail: 'Files, apps, downloads, and behavior', tokens: 4, minPlan: 'free' as PlanId, icon: Bug, color: '#ff3b5c' },
-  { title: 'Vulnerability scan', detail: 'Patch level, app risk, and exposed services', tokens: 8, minPlan: 'premium' as PlanId, icon: Search, color: '#f59e0b' },
-  { title: 'Dark web scan', detail: 'Credentials, aliases, cards, and breach dumps', tokens: 10, minPlan: 'premium' as PlanId, icon: Eye, color: '#7c3aed' },
-  { title: 'Identity monitoring', detail: 'Account recovery, passkeys, credential reuse, and ATO patterns', tokens: 9, minPlan: 'family' as PlanId, icon: Fingerprint, color: '#f59e0b' },
-  { title: 'Privacy audit', detail: 'Trackers, broker exposure, and sensitive permissions', tokens: 9, minPlan: 'family' as PlanId, icon: ShieldCheck, color: '#0ff4c6' },
-  { title: 'Social media scan', detail: 'Profiles, messages, links, and scam patterns', tokens: 12, minPlan: 'family' as PlanId, icon: Users, color: '#00d4ff' },
-  { title: 'Caller protection scan', detail: 'Spam calls, vishing, caller reputation, and risky SMS lures', tokens: 7, minPlan: 'premium' as PlanId, icon: Smartphone, color: '#7c3aed' },
-  { title: 'Security health review', detail: 'Score, recommendations, and weekly posture', tokens: 14, minPlan: 'premium' as PlanId, icon: Activity, color: '#00d4ff' },
-  { title: 'Family safety scan', detail: 'Guardian-approved checks for grooming, suspicious contacts, youth scams, and fake giveaways', tokens: 11, minPlan: 'family' as PlanId, icon: Users, color: '#0ff4c6' },
-  { title: 'Website posture scan', detail: 'Registered site baseline, SSL/TLS, domain reputation, malware, and malicious changes', tokens: 15, minPlan: 'premium' as PlanId, icon: Globe, color: '#00d4ff' },
-  { title: 'Firewall policy review', detail: 'Risky domains, scam communications, downloads, and network filtering controls', tokens: 9, minPlan: 'premium' as PlanId, icon: ShieldCheck, color: '#ff3b5c' },
+  { title: 'Malware scan', detail: 'Files, apps, downloads, and behavior', tokens: 4, minPlan: 'free' as PlanId, icon: Bug, color: '#ff7b72' },
+  { title: 'Vulnerability scan', detail: 'Patch level, app risk, and exposed services', tokens: 8, minPlan: 'premium' as PlanId, icon: Search, color: '#f2cc60' },
+  { title: 'Dark web scan', detail: 'Credentials, aliases, cards, and breach dumps', tokens: 10, minPlan: 'premium' as PlanId, icon: Eye, color: '#a78bfa' },
+  { title: 'Identity monitoring', detail: 'Account recovery, passkeys, credential reuse, and ATO patterns', tokens: 9, minPlan: 'family' as PlanId, icon: Fingerprint, color: '#f2cc60' },
+  { title: 'Privacy audit', detail: 'Trackers, broker exposure, and sensitive permissions', tokens: 9, minPlan: 'family' as PlanId, icon: ShieldCheck, color: '#95d475' },
+  { title: 'Social media scan', detail: 'Profiles, messages, links, and scam patterns', tokens: 12, minPlan: 'family' as PlanId, icon: Users, color: '#7ee787' },
+  { title: 'Caller protection scan', detail: 'Spam calls, vishing, caller reputation, and risky SMS lures', tokens: 7, minPlan: 'premium' as PlanId, icon: Smartphone, color: '#a78bfa' },
+  { title: 'Security health review', detail: 'Score, recommendations, and weekly posture', tokens: 14, minPlan: 'premium' as PlanId, icon: Activity, color: '#7ee787' },
+  { title: 'Family safety scan', detail: 'Guardian-approved checks for grooming, suspicious contacts, youth scams, and fake giveaways', tokens: 11, minPlan: 'family' as PlanId, icon: Users, color: '#95d475' },
+  { title: 'Website posture scan', detail: 'Registered site baseline, SSL/TLS, domain reputation, malware, and malicious changes', tokens: 15, minPlan: 'premium' as PlanId, icon: Globe, color: '#7ee787' },
+  { title: 'Firewall policy review', detail: 'Risky domains, scam communications, downloads, and network filtering controls', tokens: 9, minPlan: 'premium' as PlanId, icon: ShieldCheck, color: '#ff7b72' },
 ];
 
 const RESEARCH_SECURITY_RECOMMENDATIONS = [
@@ -329,7 +329,7 @@ const RESEARCH_SECURITY_RECOMMENDATIONS = [
     source: 'Threat Protection report',
     minPlan: 'free' as PlanId,
     icon: ShieldCheck,
-    color: '#00d4ff',
+    color: '#7ee787',
   },
   {
     title: 'Phase 2 social and privacy',
@@ -337,7 +337,7 @@ const RESEARCH_SECURITY_RECOMMENDATIONS = [
     source: 'Threat Protection report',
     minPlan: 'family' as PlanId,
     icon: Users,
-    color: '#0ff4c6',
+    color: '#95d475',
   },
   {
     title: 'Phase 3 AI and enterprise',
@@ -345,7 +345,7 @@ const RESEARCH_SECURITY_RECOMMENDATIONS = [
     source: 'Threat Protection report',
     minPlan: 'business' as PlanId,
     icon: Brain,
-    color: '#7c3aed',
+    color: '#a78bfa',
   },
   {
     title: 'Visibility before automation',
@@ -353,7 +353,7 @@ const RESEARCH_SECURITY_RECOMMENDATIONS = [
     source: 'Cyber Automation report',
     minPlan: 'premium' as PlanId,
     icon: Search,
-    color: '#f59e0b',
+    color: '#f2cc60',
   },
   {
     title: 'Identity hardening',
@@ -361,7 +361,7 @@ const RESEARCH_SECURITY_RECOMMENDATIONS = [
     source: 'Cyber Automation report',
     minPlan: 'premium' as PlanId,
     icon: Fingerprint,
-    color: '#ff3b5c',
+    color: '#ff7b72',
   },
   {
     title: 'Human approval gates',
@@ -369,7 +369,7 @@ const RESEARCH_SECURITY_RECOMMENDATIONS = [
     source: 'Cyber Automation report',
     minPlan: 'business' as PlanId,
     icon: CheckCircle,
-    color: '#00d4ff',
+    color: '#7ee787',
   },
 ];
 
@@ -493,12 +493,12 @@ function buildSecurityScoreModel(activity: SecurityScoreActivity, plan: PlanId):
   const status = score >= 86 ? 'SECURE' : score >= 72 ? 'MONITOR' : 'ACTION';
   const trend = activity.refreshes > 0 ? `+${Math.min(9, activity.refreshes + activity.resolvedIssues)} refreshed` : '+4 this week';
   const breakdown = [
-    { label: 'Malware', value: averageModuleScore(['malware', 'ransomware', 'file']), color: '#ff3b5c' },
-    { label: 'Identity', value: averageModuleScore(['dark-web', 'identity', 'credential-leaks', 'account-takeover', 'social']), color: '#7c3aed' },
-    { label: 'Family/Web', value: averageModuleScore(['family-safety', 'website-protection', 'personal-firewall']), color: '#0ff4c6' },
-    { label: 'Network', value: averageModuleScore(['network', 'wifi', 'vpn', 'ddos-monitoring', 'api-security']), color: '#00d4ff' },
-    { label: 'Privacy', value: averageModuleScore(['privacy', 'device', 'camera-mic']), color: '#0ff4c6' },
-    { label: 'AI defense', value: averageModuleScore(['zero-day', 'ai-attacks', 'deepfake', 'threat-intel']), color: '#f59e0b' },
+    { label: 'Malware', value: averageModuleScore(['malware', 'ransomware', 'file']), color: '#ff7b72' },
+    { label: 'Identity', value: averageModuleScore(['dark-web', 'identity', 'credential-leaks', 'account-takeover', 'social']), color: '#a78bfa' },
+    { label: 'Family/Web', value: averageModuleScore(['family-safety', 'website-protection', 'personal-firewall']), color: '#95d475' },
+    { label: 'Network', value: averageModuleScore(['network', 'wifi', 'vpn', 'ddos-monitoring', 'api-security']), color: '#7ee787' },
+    { label: 'Privacy', value: averageModuleScore(['privacy', 'device', 'camera-mic']), color: '#95d475' },
+    { label: 'AI defense', value: averageModuleScore(['zero-day', 'ai-attacks', 'deepfake', 'threat-intel']), color: '#f2cc60' },
   ];
   const trendData = SCORE_HISTORY.map((item, index) => ({
     label: item.label,
@@ -1306,7 +1306,7 @@ function SplashScreen({ onNext }: { onNext: () => void }) {
   );
 
   return (
-    <LinearGradient colors={[hexWithAlpha(colors.primary, '1f'), colors.background, colors.background]} style={styles.fullScreen}>
+    <LinearGradient colors={[colors.background, colors.background, colors.backgroundSoft]} style={styles.fullScreen}>
       {particles.map((particle, index) => (
         <View
           key={index}
@@ -1630,7 +1630,7 @@ function SecuritySetupScreen({ onComplete }: { onComplete: () => void }) {
         {SETUP_STEPS.map((step) => (
           <Card key={step} style={styles.setupRow}>
             <View style={[styles.checkBubble, { backgroundColor: enabled[step] ? colors.primary : colors.surfaceStrong }]}>
-              <Check size={16} color={enabled[step] ? '#041014' : colors.textMuted} />
+              <Check size={16} color={enabled[step] ? '#050505' : colors.textMuted} />
             </View>
             <Text style={[styles.setupText, { color: colors.text }]}>{step}</Text>
             <Switch
@@ -1905,7 +1905,7 @@ function DashboardScreen({
         </Card>
       ) : null}
 
-      <LinearGradient colors={[hexWithAlpha(colors.primary, '26'), hexWithAlpha(colors.accent, '12')]} style={[styles.heroCard, { borderColor: colors.border }]}>
+      <LinearGradient colors={[colors.card, colors.cardAlt]} style={[styles.heroCard, { borderColor: colors.border }]}>
         <View style={styles.heroTopRow}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.heroEyebrow, { color: colors.accent }]}>Live protection</Text>
@@ -2076,7 +2076,7 @@ function ProtectionHubScreen({ onOpenModule }: { onOpenModule: (module: Security
   return (
     <ScrollScreen>
       <ScreenHeader title="Security Hub" subtitle="Figma-aligned command center for detection, recommendations, and plan-scaled protections." />
-      <LinearGradient colors={[hexWithAlpha(colors.primary, '18'), hexWithAlpha(colors.purple, '10')]} style={[styles.coverageHero, { borderColor: colors.border }]}>
+      <LinearGradient colors={[colors.card, colors.cardAlt]} style={[styles.coverageHero, { borderColor: colors.border }]}>
         <View style={styles.coverageHeroTop}>
           <View>
             <Text style={[styles.heroEyebrow, { color: colors.accent }]}>Security Hub</Text>
@@ -3023,7 +3023,7 @@ function AssistantScreen({ onBack, onNavigate }: { onBack: () => void; onNavigat
                   </View>
                 ) : null}
                 {isUser ? (
-                  <LinearGradient colors={[colors.primary, colors.accent]} style={[styles.messageBubble, styles.userBubble]}>
+                  <LinearGradient colors={[colors.primary, colors.success]} style={[styles.messageBubble, styles.userBubble]}>
                     <Text style={styles.userMessageText}>{message.text}</Text>
                   </LinearGradient>
                 ) : (
@@ -3107,8 +3107,8 @@ function AssistantScreen({ onBack, onNavigate }: { onBack: () => void; onNavigat
             returnKeyType="default"
           />
           <Pressable onPress={() => sendPrompt(prompt)} style={[styles.sendButton, { opacity: isThinking || isGenerating ? 0.55 : 1 }]}>
-            <LinearGradient colors={[colors.primary, colors.accent]} style={styles.sendButtonGradient}>
-              <ArrowRight size={15} color="#041014" />
+            <LinearGradient colors={[colors.primary, colors.success]} style={styles.sendButtonGradient}>
+              <ArrowRight size={15} color="#050505" />
             </LinearGradient>
           </Pressable>
         </View>
@@ -4571,7 +4571,7 @@ function BottomNavigation({ screen, onNavigate }: { screen: AppScreen; onNavigat
   const bottomPadding = Math.max(insets.bottom, Platform.OS === 'android' ? 18 : 14);
 
   return (
-    <View style={[styles.bottomNav, { backgroundColor: colors.tab, borderTopColor: colors.border, paddingBottom: bottomPadding }]}>
+    <View style={[styles.bottomNav, { backgroundColor: colors.tab, borderColor: colors.border, paddingBottom: bottomPadding }]}>
       {navItems.map((item) => {
         const Icon = item.icon;
         const active = screen === item.screen || (screen === 'module' && item.screen === 'protection');
@@ -4614,7 +4614,7 @@ export default function DeltexSecurityApp() {
   const [selectedModule, setSelectedModule] = useState<SecurityModule>(MODULES[0]);
   const [needsSetup, setNeedsSetup] = useState(false);
 
-  const maxWidth = width >= 840 ? 780 : undefined;
+  const maxWidth = width >= 1100 ? 1120 : width >= 840 ? 860 : undefined;
   const visibleStage: FlowStage =
     !hasAcceptedConsent && stage !== 'splash'
       ? 'onboarding'
@@ -5139,7 +5139,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   avatarText: {
-    color: '#041014',
+    color: '#050505',
     fontWeight: '900',
   },
   avatarImage: {
@@ -5953,7 +5953,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   userMessageText: {
-    color: '#041014',
+    color: '#050505',
     fontSize: 11,
     lineHeight: 16,
     fontWeight: '800',
@@ -6181,7 +6181,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   profileAvatarText: {
-    color: '#041014',
+    color: '#050505',
     fontSize: 20,
     fontWeight: '900',
   },
@@ -6760,12 +6760,13 @@ const styles = StyleSheet.create({
   },
   bottomNav: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderTopWidth: 1,
+    left: 12,
+    right: 12,
+    bottom: 10,
+    borderWidth: 1,
+    borderRadius: 18,
     paddingTop: 8,
-    paddingBottom: Platform.select({ ios: 24, android: 14, default: 14 }),
+    paddingBottom: Platform.select({ ios: 18, android: 12, default: 12 }),
     paddingHorizontal: 10,
     flexDirection: 'row',
     justifyContent: 'space-around',

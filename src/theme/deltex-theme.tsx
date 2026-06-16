@@ -73,7 +73,7 @@ const LIGHT: ThemePalette = {
   textSubtle: '#8b867a',
   border: 'rgba(23,23,20,0.12)',
   primary: '#198f3b',
-  accent: '#7c3aed',
+  accent: '#6d28d9',
   danger: '#dc2626',
   warning: '#b7791f',
   success: '#15803d',
