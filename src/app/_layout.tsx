@@ -1,15 +1,44 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import 'react-native-reanimated';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { AuthProvider } from '@/context/auth-context';
+import { AiChatProvider } from '@/context/ai-chat-context';
+import { ConsentProvider } from '@/context/consent-context';
+import { ProfileProvider } from '@/context/profile-context';
+import { ProtectionProvider } from '@/context/protection-context';
+import { ReferralRewardsProvider } from '@/context/referral-rewards-context';
+import { SubscriptionProvider } from '@/context/subscription-context';
+import { DeltexThemeProvider, useDeltexTheme } from '@/theme/deltex-theme';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+function ThemedStatusBar() {
+  const { resolvedTheme } = useDeltexTheme();
+
+  return <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />;
+}
+
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <DeltexThemeProvider>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <ProfileProvider>
+              <ConsentProvider>
+                <ReferralRewardsProvider>
+                  <ProtectionProvider>
+                    <AiChatProvider>
+                      <ThemedStatusBar />
+                      <Stack screenOptions={{ headerShown: false }} />
+                    </AiChatProvider>
+                  </ProtectionProvider>
+                </ReferralRewardsProvider>
+              </ConsentProvider>
+            </ProfileProvider>
+          </SubscriptionProvider>
+        </AuthProvider>
+      </DeltexThemeProvider>
+    </GestureHandlerRootView>
   );
 }
