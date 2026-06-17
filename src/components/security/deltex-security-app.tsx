@@ -2853,6 +2853,7 @@ function buildAssistantResponse(prompt: string, type: AnalysisType, result: Anal
 
 function AssistantScreen({ onBack, onNavigate }: { onBack: () => void; onNavigate: (screen: AppScreen) => void }) {
   const { colors } = useDeltexTheme();
+  const { width } = useWindowDimensions();
   const { effectivePlan } = useSubscription();
   const chat = useAiChat();
   const [prompt, setPrompt] = useState('');
@@ -2871,6 +2872,8 @@ function AssistantScreen({ onBack, onNavigate }: { onBack: () => void; onNavigat
   const voiceBasePromptRef = useRef('');
   const messages = chat.activeConversation.messages as ChatMessage[];
   const locked = PLAN_RANK[effectivePlan] < PLAN_RANK.premium;
+  const plan = PLANS.find((item) => item.id === effectivePlan) || PLANS[0];
+  const wideChatLayout = width >= 980;
 
   useEffect(() => {
     return () => {
@@ -3035,181 +3038,234 @@ function AssistantScreen({ onBack, onNavigate }: { onBack: () => void; onNavigat
 
   return (
     <ScrollScreen>
-      <View style={[styles.aiWorkspaceHeader, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Back" style={[styles.aiHeaderButton, { backgroundColor: colors.surfaceStrong }]}>
-          <ChevronLeft size={20} color={colors.text} />
-        </Pressable>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.chatTitle, { color: colors.text }]} numberOfLines={1}>
-            {chat.activeConversation.title}
-          </Text>
-          <Text style={[styles.chatStatus, { color: isListening ? colors.purple : isSpeaking ? colors.accent : isThinking || isGenerating ? colors.warning : colors.success }]}>
-            {isListening ? 'Listening' : isSpeaking ? 'Speaking' : isThinking ? 'Checking risk' : isGenerating ? 'Writing answer' : 'Ready'}
-          </Text>
-        </View>
-        <Pressable onPress={() => void chat.createConversation()} accessibilityRole="button" accessibilityLabel="New chat" style={[styles.aiHeaderButton, { backgroundColor: colors.surfaceStrong }]}>
-          <Plus size={17} color={colors.primary} />
-        </Pressable>
-        <Pressable onPress={() => onNavigate('protection')} accessibilityRole="button" accessibilityLabel="Open protections" style={[styles.aiHeaderButton, { backgroundColor: colors.surfaceStrong }]}>
-          <ShieldCheck size={17} color={colors.accent} />
-        </Pressable>
-        <Pressable onPress={toggleListening} accessibilityRole="button" accessibilityLabel={isListening ? 'Stop voice input' : 'Start voice input'} style={[styles.aiHeaderButton, { backgroundColor: isListening ? hexWithAlpha(colors.purple, '20') : colors.surfaceStrong }]}>
-          {isListening ? <MicOff size={17} color={colors.purple} /> : <Mic size={17} color={colors.textMuted} />}
-        </Pressable>
-        <Pressable onPress={() => setShowDataControls(true)} accessibilityRole="button" accessibilityLabel="Chat data controls" style={[styles.aiHeaderButton, { backgroundColor: colors.surfaceStrong }]}>
-          <Settings size={17} color={colors.textMuted} />
-        </Pressable>
-      </View>
-
-      <Card style={styles.chatPanel} glow={colors.purple}>
-        <View style={[styles.chatHeader, { borderBottomColor: colors.border }]}>
-          <View style={[styles.chatBotIcon, { backgroundColor: hexWithAlpha(colors.purple, '22') }]}>
-            <Brain size={18} color={colors.purple} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.chatTitle, { color: colors.text }]}>Deltex AI Assistant</Text>
-            <Text style={[styles.chatStatus, { color: isThinking || isGenerating ? colors.warning : colors.success }]}>
-              {isListening ? 'Listening' : isSpeaking ? 'Speaking' : isThinking ? 'Checking risk' : isGenerating ? 'Writing answer' : 'Ready'}
-            </Text>
-          </View>
-          <View style={styles.voiceHeaderControls}>
-            <Pressable
-              onPress={() => {
-                if (isSpeaking) {
-                  stopSpeaking();
-                  return;
-                }
-                setVoiceEnabled((enabled) => !enabled);
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={voiceEnabled ? 'Turn voice responses off' : 'Turn voice responses on'}
-              style={[styles.voiceMiniButton, { backgroundColor: voiceEnabled || isSpeaking ? hexWithAlpha(colors.accent, '18') : colors.surfaceStrong, borderColor: voiceEnabled || isSpeaking ? hexWithAlpha(colors.accent, '55') : colors.border }]}
-            >
-              {voiceEnabled || isSpeaking ? <Volume2 size={15} color={colors.accent} /> : <VolumeX size={15} color={colors.textMuted} />}
+      <View style={[styles.aiChatShell, !wideChatLayout && styles.aiChatShellCompact]}>
+        <View style={[styles.aiChatSidebar, !wideChatLayout && styles.aiChatSidebarCompact, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={styles.chatSidebarTop}>
+            <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Back" style={[styles.aiHeaderButton, { backgroundColor: colors.surfaceStrong }]}>
+              <ChevronLeft size={18} color={colors.text} />
             </Pressable>
-            <Pressable
-              onPress={toggleListening}
-              accessibilityRole="button"
-              accessibilityLabel={isListening ? 'Stop voice input' : 'Start voice input'}
-              style={[styles.voiceMiniButton, { backgroundColor: isListening ? hexWithAlpha(colors.purple, '20') : colors.surfaceStrong, borderColor: isListening ? hexWithAlpha(colors.purple, '66') : colors.border }]}
-            >
-              {isListening ? <MicOff size={15} color={colors.purple} /> : <Mic size={15} color={colors.textMuted} />}
-            </Pressable>
-          </View>
-          {locked ? (
-            <View style={[styles.promptCounter, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
-              <Text style={[styles.promptCounterText, { color: colors.textMuted }]}>5 prompts</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.chatSidebarTitle, { color: colors.text }]}>Deltex AI</Text>
+              <Text style={[styles.chatSidebarMeta, { color: colors.textMuted }]}>Security chat workspace</Text>
             </View>
-          ) : null}
+          </View>
+
+          <Pressable onPress={() => void chat.createConversation()} style={[styles.chatSidebarPrimary, { backgroundColor: PRIMARY_BUTTON }]}>
+            <Plus size={16} color="#ffffff" />
+            <Text style={styles.chatSidebarPrimaryText}>New chat</Text>
+          </Pressable>
+
+          <View style={styles.chatSidebarSection}>
+            <Text style={[styles.chatSidebarSectionLabel, { color: colors.textSubtle }]}>Conversations</Text>
+            {chat.conversations.slice(0, wideChatLayout ? 8 : 4).map((conversation) => {
+              const active = conversation.id === chat.activeConversationId;
+
+              return (
+                <Pressable
+                  key={conversation.id}
+                  onPress={() => chat.setActiveConversation(conversation.id)}
+                  style={[
+                    styles.chatSidebarConversation,
+                    {
+                      backgroundColor: active ? hexWithAlpha(colors.primary, '16') : colors.surfaceStrong,
+                      borderColor: active ? hexWithAlpha(colors.primary, '55') : colors.border,
+                    },
+                  ]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.chatSidebarConversationTitle, { color: active ? colors.primary : colors.text }]} numberOfLines={1}>
+                      {conversation.title}
+                    </Text>
+                    <Text style={[styles.chatSidebarMeta, { color: colors.textMuted }]}>{conversation.messages.length} messages</Text>
+                  </View>
+                  <Pressable onPress={() => void chat.deleteConversation(conversation.id)} hitSlop={8}>
+                    <ShieldAlert size={14} color={colors.textSubtle} />
+                  </Pressable>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={styles.chatSidebarSection}>
+            <Text style={[styles.chatSidebarSectionLabel, { color: colors.textSubtle }]}>Controls</Text>
+            <Pressable onPress={() => onNavigate('protection')} style={[styles.chatSidebarTool, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+              <ShieldCheck size={15} color={colors.accent} />
+              <Text style={[styles.chatSidebarToolText, { color: colors.text }]}>Protections</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setVoiceEnabled((enabled) => !enabled)}
+              style={[styles.chatSidebarTool, { backgroundColor: colors.surfaceStrong, borderColor: voiceEnabled ? hexWithAlpha(colors.accent, '55') : colors.border }]}
+            >
+              {voiceEnabled ? <Volume2 size={15} color={colors.accent} /> : <VolumeX size={15} color={colors.textMuted} />}
+              <Text style={[styles.chatSidebarToolText, { color: colors.text }]}>{voiceEnabled ? 'Voice replies on' : 'Voice replies off'}</Text>
+            </Pressable>
+            <Pressable onPress={() => setShowDataControls(true)} style={[styles.chatSidebarTool, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+              <Settings size={15} color={colors.textMuted} />
+              <Text style={[styles.chatSidebarToolText, { color: colors.text }]}>Data controls</Text>
+            </Pressable>
+          </View>
+
+          <View style={[styles.chatSidebarAccess, { backgroundColor: hexWithAlpha(plan.color, '10'), borderColor: hexWithAlpha(plan.color, '44') }]}>
+            <Text style={[styles.chatSidebarSectionLabel, { color: plan.color }]}>Access</Text>
+            <Text style={[styles.chatSidebarAccessText, { color: colors.text }]}>{plan.name} plan</Text>
+            <Text style={[styles.chatSidebarMeta, { color: colors.textMuted }]}>{formatAiPromptLimit(effectivePlan)}</Text>
+          </View>
         </View>
 
-        {voiceNotice ? (
-          <View style={[styles.voiceNotice, { backgroundColor: hexWithAlpha(isListening ? colors.purple : colors.accent, '10'), borderColor: hexWithAlpha(isListening ? colors.purple : colors.accent, '33') }]}>
-            <View style={[styles.voicePulseDot, { backgroundColor: isListening ? colors.purple : colors.accent }]} />
-            <Text style={[styles.voiceNoticeText, { color: colors.textMuted }]}>{voiceNotice}</Text>
+        <View style={styles.aiChatMain}>
+          <View style={[styles.aiWorkspaceHeader, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.chatBotIcon, { backgroundColor: hexWithAlpha(colors.purple, '22') }]}>
+              <Brain size={18} color={colors.purple} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.chatTitle, { color: colors.text }]} numberOfLines={1}>
+                {chat.activeConversation.title}
+              </Text>
+              <Text style={[styles.chatStatus, { color: isListening ? colors.purple : isSpeaking ? colors.accent : isThinking || isGenerating ? colors.warning : colors.success }]}>
+                {isListening ? 'Listening' : isSpeaking ? 'Speaking' : isThinking ? 'Checking risk' : isGenerating ? 'Writing answer' : 'Ready'}
+              </Text>
+            </View>
+            <View style={styles.voiceHeaderControls}>
+              <Pressable
+                onPress={() => {
+                  if (isSpeaking) {
+                    stopSpeaking();
+                    return;
+                  }
+                  setVoiceEnabled((enabled) => !enabled);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={voiceEnabled ? 'Turn voice responses off' : 'Turn voice responses on'}
+                style={[styles.voiceMiniButton, { backgroundColor: voiceEnabled || isSpeaking ? hexWithAlpha(colors.accent, '18') : colors.surfaceStrong, borderColor: voiceEnabled || isSpeaking ? hexWithAlpha(colors.accent, '55') : colors.border }]}
+              >
+                {voiceEnabled || isSpeaking ? <Volume2 size={15} color={colors.accent} /> : <VolumeX size={15} color={colors.textMuted} />}
+              </Pressable>
+              <Pressable
+                onPress={toggleListening}
+                accessibilityRole="button"
+                accessibilityLabel={isListening ? 'Stop voice input' : 'Start voice input'}
+                style={[styles.voiceMiniButton, { backgroundColor: isListening ? hexWithAlpha(colors.purple, '20') : colors.surfaceStrong, borderColor: isListening ? hexWithAlpha(colors.purple, '66') : colors.border }]}
+              >
+                {isListening ? <MicOff size={15} color={colors.purple} /> : <Mic size={15} color={colors.textMuted} />}
+              </Pressable>
+            </View>
+            {locked ? (
+              <View style={[styles.promptCounter, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+                <Text style={[styles.promptCounterText, { color: colors.textMuted }]}>5 prompts</Text>
+              </View>
+            ) : null}
           </View>
-        ) : null}
 
-        <View style={styles.chatMessages}>
-          {messages.map((message) => {
-            const isUser = message.role === 'user';
+          <Card style={styles.chatPanel}>
+            {voiceNotice ? (
+              <View style={[styles.voiceNotice, { backgroundColor: hexWithAlpha(isListening ? colors.purple : colors.accent, '10'), borderColor: hexWithAlpha(isListening ? colors.purple : colors.accent, '33') }]}>
+                <View style={[styles.voicePulseDot, { backgroundColor: isListening ? colors.purple : colors.accent }]} />
+                <Text style={[styles.voiceNoticeText, { color: colors.textMuted }]}>{voiceNotice}</Text>
+              </View>
+            ) : null}
 
-            return (
-              <View key={message.id} style={[styles.messageRow, isUser && styles.messageRowUser]}>
-                {!isUser ? (
+            <View style={styles.chatMessages}>
+              {messages.map((message) => {
+                const isUser = message.role === 'user';
+
+                return (
+                  <View key={message.id} style={[styles.messageRow, isUser && styles.messageRowUser]}>
+                    {!isUser ? (
+                      <View style={[styles.messageAvatar, { backgroundColor: hexWithAlpha(colors.purple, '22') }]}>
+                        <Brain size={15} color={colors.purple} />
+                      </View>
+                    ) : null}
+                    {isUser ? (
+                      <View style={[styles.messageBubble, styles.userBubble, { backgroundColor: colors.primary }]}>
+                        <Text style={styles.userMessageText}>{message.text}</Text>
+                      </View>
+                    ) : (
+                      <View style={[styles.messageBubble, styles.aiBubble, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+                        <Text style={[styles.aiMessageText, { color: colors.textMuted }]}>
+                          {message.text}
+                          {message.streaming ? '|' : ''}
+                        </Text>
+                        {message.result ? (
+                          <View style={styles.chatScoreRow}>
+                            <View style={[styles.chatScorePill, { borderColor: hexWithAlpha(colors.accent, '55'), backgroundColor: hexWithAlpha(colors.accent, '12') }]}>
+                              <Text style={[styles.chatScoreText, { color: colors.accent }]}>Trust {message.result.trustScore}</Text>
+                            </View>
+                            <View style={[styles.chatScorePill, { borderColor: hexWithAlpha(colors.warning, '55'), backgroundColor: hexWithAlpha(colors.warning, '12') }]}>
+                              <Text style={[styles.chatScoreText, { color: colors.warning }]}>Risk {message.result.fraudRisk}</Text>
+                            </View>
+                          </View>
+                        ) : null}
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+              {isThinking ? (
+                <View style={styles.messageRow}>
                   <View style={[styles.messageAvatar, { backgroundColor: hexWithAlpha(colors.purple, '22') }]}>
                     <Brain size={15} color={colors.purple} />
                   </View>
-                ) : null}
-                {isUser ? (
-                  <LinearGradient colors={[colors.primary, colors.success]} style={[styles.messageBubble, styles.userBubble]}>
-                    <Text style={styles.userMessageText}>{message.text}</Text>
-                  </LinearGradient>
-                ) : (
                   <View style={[styles.messageBubble, styles.aiBubble, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
+                    <Text style={[styles.aiThinkingText, { color: colors.text }]}>Thinking through the threat...</Text>
                     <Text style={[styles.aiMessageText, { color: colors.textMuted }]}>
-                      {message.text}
-                      {message.streaming ? '|' : ''}
+                      Checking scam patterns, fraud risk, vulnerability context, dark web signals, and plan access.
                     </Text>
-                    {message.result ? (
-                      <View style={styles.chatScoreRow}>
-                        <View style={[styles.chatScorePill, { borderColor: hexWithAlpha(colors.accent, '55'), backgroundColor: hexWithAlpha(colors.accent, '12') }]}>
-                          <Text style={[styles.chatScoreText, { color: colors.accent }]}>Trust {message.result.trustScore}</Text>
-                        </View>
-                        <View style={[styles.chatScorePill, { borderColor: hexWithAlpha(colors.warning, '55'), backgroundColor: hexWithAlpha(colors.warning, '12') }]}>
-                          <Text style={[styles.chatScoreText, { color: colors.warning }]}>Risk {message.result.fraudRisk}</Text>
-                        </View>
-                      </View>
-                    ) : null}
+                    <View style={styles.typingDots}>
+                      {[0, 1, 2].map((dot) => (
+                        <View key={dot} style={[styles.typingDot, { backgroundColor: dot === 1 ? colors.accent : colors.primary }]} />
+                      ))}
+                    </View>
                   </View>
-                )}
-              </View>
-            );
-          })}
-          {isThinking ? (
-            <View style={styles.messageRow}>
-              <View style={[styles.messageAvatar, { backgroundColor: hexWithAlpha(colors.purple, '22') }]}>
-                <Brain size={15} color={colors.purple} />
-              </View>
-              <View style={[styles.messageBubble, styles.aiBubble, { backgroundColor: colors.cardAlt, borderColor: colors.border }]}>
-                <Text style={[styles.aiThinkingText, { color: colors.text }]}>Thinking through the threat...</Text>
-                <Text style={[styles.aiMessageText, { color: colors.textMuted }]}>
-                  Checking scam patterns, fraud risk, vulnerability context, dark web signals, and plan access.
-                </Text>
-                <View style={styles.typingDots}>
-                  {[0, 1, 2].map((dot) => (
-                    <View key={dot} style={[styles.typingDot, { backgroundColor: dot === 1 ? colors.accent : colors.primary }]} />
-                  ))}
                 </View>
-              </View>
+              ) : null}
             </View>
-          ) : null}
-        </View>
-      </Card>
+          </Card>
 
-      <View style={[styles.chatComposer, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        {attachment ? (
-          <View style={[styles.composerAttachment, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
-            <FileText size={14} color={colors.primary} />
-            <Text style={[styles.attachmentText, { color: colors.textMuted }]} numberOfLines={1}>
-              {attachment}
-            </Text>
-            <Pressable onPress={() => setAttachment(null)} hitSlop={8}>
-              <Text style={[styles.attachmentRemove, { color: colors.textSubtle }]}>x</Text>
-            </Pressable>
+          <View style={[styles.chatComposer, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            {attachment ? (
+              <View style={[styles.composerAttachment, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+                <FileText size={14} color={colors.primary} />
+                <Text style={[styles.attachmentText, { color: colors.textMuted }]} numberOfLines={1}>
+                  {attachment}
+                </Text>
+                <Pressable onPress={() => setAttachment(null)} hitSlop={8}>
+                  <Text style={[styles.attachmentRemove, { color: colors.textSubtle }]}>x</Text>
+                </Pressable>
+              </View>
+            ) : null}
+            <View style={styles.composerInputRow}>
+              <Pressable onPress={() => void pickImage()} accessibilityRole="button" accessibilityLabel="Attach image" style={[styles.composerIconButton, { backgroundColor: colors.surfaceStrong }]}>
+                <Upload size={14} color={colors.primary} />
+              </Pressable>
+              <Pressable onPress={() => void pickDocument()} accessibilityRole="button" accessibilityLabel="Attach file" style={[styles.composerIconButton, { backgroundColor: colors.surfaceStrong }]}>
+                <FileText size={14} color={colors.accent} />
+              </Pressable>
+              <Pressable
+                onPress={toggleListening}
+                accessibilityRole="button"
+                accessibilityLabel={isListening ? 'Stop voice input' : 'Start voice input'}
+                style={[styles.composerIconButton, { backgroundColor: isListening ? hexWithAlpha(colors.purple, '20') : colors.surfaceStrong }]}
+              >
+                {isListening ? <MicOff size={14} color={colors.purple} /> : <Mic size={14} color={colors.textMuted} />}
+              </Pressable>
+              <TextInput
+                value={prompt}
+                onChangeText={setPrompt}
+                multiline
+                scrollEnabled={composerHeight >= 132}
+                onContentSizeChange={(event) => setComposerHeight(Math.min(132, Math.max(42, event.nativeEvent.contentSize.height)))}
+                placeholder="Message Deltex AI..."
+                placeholderTextColor={colors.textSubtle}
+                style={[styles.composerTextInput, { color: colors.text, height: composerHeight }]}
+                returnKeyType="default"
+              />
+              <Pressable onPress={() => sendPrompt(prompt)} style={[styles.sendButton, { opacity: isThinking || isGenerating ? 0.55 : 1 }]}>
+                <View style={[styles.sendButtonGradient, { backgroundColor: colors.primary }]}>
+                  <ArrowRight size={15} color="#ffffff" />
+                </View>
+              </Pressable>
+            </View>
           </View>
-        ) : null}
-        <View style={styles.composerInputRow}>
-          <Pressable onPress={() => void pickImage()} accessibilityRole="button" accessibilityLabel="Attach image" style={[styles.composerIconButton, { backgroundColor: colors.surfaceStrong }]}>
-            <Upload size={14} color={colors.primary} />
-          </Pressable>
-          <Pressable onPress={() => void pickDocument()} accessibilityRole="button" accessibilityLabel="Attach file" style={[styles.composerIconButton, { backgroundColor: colors.surfaceStrong }]}>
-            <FileText size={14} color={colors.accent} />
-          </Pressable>
-          <Pressable
-            onPress={toggleListening}
-            accessibilityRole="button"
-            accessibilityLabel={isListening ? 'Stop voice input' : 'Start voice input'}
-            style={[styles.composerIconButton, { backgroundColor: isListening ? hexWithAlpha(colors.purple, '20') : colors.surfaceStrong }]}
-          >
-            {isListening ? <MicOff size={14} color={colors.purple} /> : <Mic size={14} color={colors.textMuted} />}
-          </Pressable>
-          <TextInput
-            value={prompt}
-            onChangeText={setPrompt}
-            multiline
-            scrollEnabled={composerHeight >= 132}
-            onContentSizeChange={(event) => setComposerHeight(Math.min(132, Math.max(42, event.nativeEvent.contentSize.height)))}
-            placeholder="Message Deltex AI..."
-            placeholderTextColor={colors.textSubtle}
-            style={[styles.composerTextInput, { color: colors.text, height: composerHeight }]}
-            returnKeyType="default"
-          />
-          <Pressable onPress={() => sendPrompt(prompt)} style={[styles.sendButton, { opacity: isThinking || isGenerating ? 0.55 : 1 }]}>
-            <LinearGradient colors={[colors.primary, colors.success]} style={styles.sendButtonGradient}>
-              <ArrowRight size={15} color="#050505" />
-            </LinearGradient>
-          </Pressable>
         </View>
       </View>
 
@@ -6443,6 +6499,108 @@ const styles = StyleSheet.create({
   assistantActionButton: {
     flex: 1,
   },
+  aiChatShell: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 12,
+  },
+  aiChatShellCompact: {
+    flexDirection: 'column',
+  },
+  aiChatSidebar: {
+    width: 286,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 12,
+    gap: 12,
+    alignSelf: 'stretch',
+  },
+  aiChatSidebarCompact: {
+    width: '100%',
+  },
+  aiChatMain: {
+    flex: 1,
+    minWidth: 0,
+  },
+  chatSidebarTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+  },
+  chatSidebarTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  chatSidebarMeta: {
+    fontSize: 10,
+    lineHeight: 14,
+    fontWeight: '700',
+  },
+  chatSidebarPrimary: {
+    minHeight: 40,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
+  chatSidebarPrimaryText: {
+    color: '#ffffff',
+    fontSize: 13,
+    lineHeight: 17,
+    fontWeight: '600',
+  },
+  chatSidebarSection: {
+    gap: 7,
+  },
+  chatSidebarSectionLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+  },
+  chatSidebarConversation: {
+    minHeight: 54,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chatSidebarConversationTitle: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '800',
+  },
+  chatSidebarTool: {
+    minHeight: 38,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  chatSidebarToolText: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '800',
+  },
+  chatSidebarAccess: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 11,
+    gap: 3,
+  },
+  chatSidebarAccessText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '900',
+  },
   aiWorkspaceHeader: {
     minHeight: 58,
     borderWidth: 1,
@@ -6549,6 +6707,7 @@ const styles = StyleSheet.create({
   chatMessages: {
     gap: 10,
     padding: 13,
+    minHeight: 430,
   },
   messageRow: {
     flexDirection: 'row',
@@ -6584,7 +6743,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   userMessageText: {
-    color: '#050505',
+    color: '#ffffff',
     fontSize: 11,
     lineHeight: 16,
     fontWeight: '800',
