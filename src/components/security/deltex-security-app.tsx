@@ -1325,49 +1325,23 @@ function ScrollScreen({ children }: { children: React.ReactNode }) {
 
 function SplashScreen({ onNext }: { onNext: () => void }) {
   const { colors } = useDeltexTheme();
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 18 }, (_, index) => ({
-        left: (index * 47) % 360,
-        top: (index * 83) % 760,
-        size: 2 + (index % 4),
-        opacity: 0.08 + (index % 4) * 0.04,
-      })),
-    [],
-  );
+
+  useEffect(() => {
+    const timer = setTimeout(onNext, 1200);
+    return () => clearTimeout(timer);
+  }, [onNext]);
 
   return (
     <LinearGradient colors={[colors.background, colors.background, colors.backgroundSoft]} style={styles.fullScreen}>
-      {particles.map((particle, index) => (
-        <View
-          key={index}
-          style={[
-            styles.particle,
-            {
-              left: particle.left,
-              top: particle.top,
-              width: particle.size,
-              height: particle.size,
-              opacity: particle.opacity,
-              backgroundColor: colors.primary,
-            },
-          ]}
-        />
-      ))}
       <View style={styles.splashCenter}>
-        <View style={[styles.splashLogoFrame, { borderColor: hexWithAlpha(colors.primary, '55') }]}>
+        <View style={styles.splashLogoFrame}>
           <Image source={logoSource} style={styles.splashLogo} resizeMode="contain" />
         </View>
-        <Text style={[styles.splashTitle, { color: colors.text }]}>Deltex AI</Text>
-        <Text style={[styles.splashSubtitle, { color: colors.textMuted }]}>AI-powered cyber defense for every digital surface</Text>
         <View style={styles.loadingDots}>
           {[0, 1, 2].map((item) => (
             <View key={item} style={[styles.loadingDot, { backgroundColor: item === 1 ? colors.accent : colors.primary }]} />
           ))}
         </View>
-      </View>
-      <View style={styles.bottomCta}>
-        <GradientButton label="Get Protected Now" onPress={onNext} icon={ShieldCheck} />
       </View>
     </LinearGradient>
   );
@@ -4720,7 +4694,17 @@ function BillingScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
-function AppSidebar({ screen, onNavigate }: { screen: AppScreen; onNavigate: (screen: AppScreen) => void }) {
+function AppSidebar({
+  screen,
+  activeModuleId,
+  onNavigate,
+  onOpenModule,
+}: {
+  screen: AppScreen;
+  activeModuleId?: SecurityModuleId;
+  onNavigate: (screen: AppScreen) => void;
+  onOpenModule: (module: SecurityModule) => void;
+}) {
   const { colors } = useDeltexTheme();
   const auth = useAuthContext();
   const { profile } = useProfile();
@@ -4756,6 +4740,33 @@ function AppSidebar({ screen, onNavigate }: { screen: AppScreen; onNavigate: (sc
     );
   };
 
+  const renderModuleItem = (module: SecurityModule) => {
+    const Icon = moduleIcons[module.id];
+    const active = screen === 'module' && activeModuleId === module.id;
+    const accessible = isModuleAccessible(module, effectivePlan);
+
+    return (
+      <Pressable
+        key={module.id}
+        onPress={() => onOpenModule(module)}
+        style={[
+          styles.sidebarNavItem,
+          styles.sidebarModuleItem,
+          {
+            backgroundColor: active ? PRIMARY_BUTTON : 'transparent',
+            borderColor: active ? PRIMARY_BUTTON : 'transparent',
+            opacity: accessible ? 1 : 0.62,
+          },
+        ]}
+      >
+        <Icon size={16} color={active ? '#ffffff' : module.color} />
+        <Text style={[styles.sidebarNavLabel, styles.sidebarModuleLabel, { color: active ? '#ffffff' : colors.text }]} numberOfLines={1}>
+          {module.shortTitle}
+        </Text>
+      </Pressable>
+    );
+  };
+
   return (
     <View style={[styles.appSidebar, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <View style={styles.sidebarBrandBlock}>
@@ -4766,15 +4777,22 @@ function AppSidebar({ screen, onNavigate }: { screen: AppScreen; onNavigate: (sc
         </View>
       </View>
 
-      <View style={styles.sidebarSection}>
-        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Main</Text>
-        {navItems.map(renderNavItem)}
-      </View>
+      <ScrollView style={styles.sidebarScroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.sidebarSection}>
+          <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Main</Text>
+          {navItems.map(renderNavItem)}
+        </View>
 
-      <View style={styles.sidebarSection}>
-        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Account & Tools</Text>
-        {sidebarManageItems.map(renderNavItem)}
-      </View>
+        <View style={styles.sidebarSection}>
+          <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Protection Modules</Text>
+          {MODULES.map(renderModuleItem)}
+        </View>
+
+        <View style={styles.sidebarSection}>
+          <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Account & Tools</Text>
+          {sidebarManageItems.map(renderNavItem)}
+        </View>
+      </ScrollView>
 
       <View style={styles.sidebarSpacer} />
 
@@ -5013,7 +5031,7 @@ export default function DeltexSecurityApp() {
       <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { maxWidth: appMaxWidth }]}>
         {useSidebarShell ? (
           <View style={styles.appShell}>
-            <AppSidebar screen={screen} onNavigate={setScreen} />
+            <AppSidebar screen={screen} activeModuleId={selectedModule.id} onNavigate={setScreen} onOpenModule={openModule} />
             <View style={styles.appMainPanel}>
               {screen === 'assistant' ? null : <AppShellHeader screen={screen} onNavigate={setScreen} />}
               <View style={styles.appContent}>{renderAppScreen()}</View>
@@ -5114,6 +5132,11 @@ const styles = StyleSheet.create({
     gap: 5,
     marginBottom: 16,
   },
+  sidebarScroll: {
+    flex: 1,
+    marginHorizontal: -2,
+    paddingHorizontal: 2,
+  },
   sidebarSectionLabel: {
     fontSize: 10,
     fontWeight: '900',
@@ -5134,6 +5157,15 @@ const styles = StyleSheet.create({
   sidebarNavLabel: {
     flex: 1,
     fontSize: 13,
+    fontWeight: '700',
+  },
+  sidebarModuleItem: {
+    minHeight: 36,
+    paddingHorizontal: 10,
+  },
+  sidebarModuleLabel: {
+    fontSize: 11,
+    lineHeight: 15,
     fontWeight: '700',
   },
   sidebarSpacer: {
@@ -5300,44 +5332,22 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
   },
-  particle: {
-    position: 'absolute',
-    borderRadius: 8,
-  },
   splashCenter: {
     alignItems: 'center',
     paddingHorizontal: 28,
-    gap: 12,
+    gap: 18,
   },
   splashLogoFrame: {
-    width: 104,
-    height: 104,
-    borderRadius: 28,
-    borderWidth: 1,
+    width: 68,
+    height: 68,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   splashLogo: {
-    width: 92,
-    height: 92,
-  },
-  splashTitle: {
-    fontSize: 30,
-    fontWeight: '900',
-    letterSpacing: -1.2,
-  },
-  splashSubtitle: {
-    fontSize: 12,
-    lineHeight: 18,
-    textAlign: 'center',
-    maxWidth: 310,
-  },
-  bottomCta: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 42,
+    width: 54,
+    height: 54,
   },
   loadingDots: {
     flexDirection: 'row',
