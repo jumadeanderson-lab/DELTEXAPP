@@ -199,6 +199,8 @@ interface SecurityScoreModel {
 
 const logoSource = require('@/assets/images/Logo/Deltex.png');
 const PROFILE_CROP_BOX_SIZE = 240;
+const PRIMARY_BUTTON = '#2563eb';
+const PRIMARY_BUTTON_PRESSED = '#1d4ed8';
 
 const moduleIcons: Record<SecurityModuleId, IconComponent> = {
   malware: Bug,
@@ -245,6 +247,15 @@ const navItems: { screen: AppScreen; label: string; icon: IconComponent }[] = [
   { screen: 'assistant', label: 'AI', icon: Brain },
   { screen: 'alerts', label: 'Alerts', icon: Bell },
   { screen: 'profile', label: 'Profile', icon: User },
+];
+
+const sidebarManageItems: { screen: AppScreen; label: string; icon: IconComponent }[] = [
+  { screen: 'schedule', label: 'Schedules', icon: Calendar },
+  { screen: 'subscriptions', label: 'Plans', icon: Crown },
+  { screen: 'billing', label: 'Billing', icon: CreditCard },
+  { screen: 'tokens', label: 'Tokens', icon: Database },
+  { screen: 'referrals', label: 'Referrals', icon: Star },
+  { screen: 'settings', label: 'Settings', icon: Settings },
 ];
 
 const FALLBACK_TIMEZONES = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Riyadh', 'Asia/Dubai', 'Asia/Singapore', 'Australia/Sydney'];
@@ -606,6 +617,32 @@ function Card({
   );
 }
 
+function useButtonSpinner(onPress: () => void | Promise<void>, disabled?: boolean) {
+  const [spinning, setSpinning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const handlePress = useCallback(async () => {
+    if (disabled || spinning) return;
+
+    setSpinning(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    try {
+      await Promise.resolve(onPress());
+    } finally {
+      timerRef.current = setTimeout(() => setSpinning(false), 520);
+    }
+  }, [disabled, onPress, spinning]);
+
+  return { spinning, handlePress };
+}
+
 function GradientButton({
   label,
   onPress,
@@ -614,24 +651,26 @@ function GradientButton({
   style,
 }: {
   label: string;
-  onPress: () => void;
+  onPress: () => void | Promise<void>;
   icon?: IconComponent;
   disabled?: boolean;
   style?: object;
 }) {
-  const { colors } = useDeltexTheme();
+  const { spinning, handlePress } = useButtonSpinner(onPress, disabled);
 
   return (
-    <Pressable onPress={disabled ? undefined : onPress} accessibilityRole="button" style={[{ opacity: disabled ? 0.55 : 1 }, style]}>
-      <LinearGradient
-        colors={[colors.primary, colors.success]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradientButton}
-      >
-        {Icon ? <Icon size={18} color="#050505" strokeWidth={2.5} /> : null}
-        <Text style={styles.gradientButtonText}>{label}</Text>
-      </LinearGradient>
+    <Pressable
+      onPress={handlePress}
+      accessibilityRole="button"
+      disabled={disabled || spinning}
+      style={() => [{ opacity: disabled ? 0.55 : 1 }, style]}
+    >
+      {({ pressed }) => (
+        <View style={[styles.gradientButton, { backgroundColor: pressed ? PRIMARY_BUTTON_PRESSED : PRIMARY_BUTTON }]}>
+          {spinning ? <ActivityIndicator size="small" color="#ffffff" /> : Icon ? <Icon size={18} color="#ffffff" strokeWidth={2.5} /> : null}
+          <Text style={styles.gradientButtonText}>{label}</Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -640,32 +679,31 @@ function OutlineButton({
   label,
   onPress,
   icon: Icon,
-  color,
   disabled,
   style,
 }: {
   label: string;
-  onPress: () => void;
+  onPress: () => void | Promise<void>;
   icon?: IconComponent;
   color?: string;
   disabled?: boolean;
   style?: object;
 }) {
-  const { colors } = useDeltexTheme();
-  const accent = color || colors.primary;
+  const { spinning, handlePress } = useButtonSpinner(onPress, disabled);
 
   return (
     <Pressable
-      onPress={disabled ? undefined : onPress}
+      onPress={handlePress}
       accessibilityRole="button"
-      style={[
+      disabled={disabled || spinning}
+      style={({ pressed }) => [
         styles.outlineButton,
-        { borderColor: hexWithAlpha(accent, '55'), backgroundColor: colors.cardAlt, opacity: disabled ? 0.55 : 1 },
+        { backgroundColor: pressed ? PRIMARY_BUTTON_PRESSED : PRIMARY_BUTTON, opacity: disabled ? 0.55 : 1 },
         style,
       ]}
     >
-      {Icon ? <Icon size={17} color={accent} /> : null}
-      <Text style={[styles.outlineButtonText, { color: accent }]}>{label}</Text>
+      {spinning ? <ActivityIndicator size="small" color="#ffffff" /> : Icon ? <Icon size={17} color="#ffffff" /> : null}
+      <Text style={styles.outlineButtonText}>{label}</Text>
     </Pressable>
   );
 }
@@ -1281,11 +1319,17 @@ function ProgressBar({ value, color }: { value: number; color: string }) {
 
 function ScrollScreen({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const desktopShell = width >= 920;
 
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(132, insets.bottom + 118) }]}
+      contentContainerStyle={[
+        styles.scrollContent,
+        desktopShell && styles.scrollContentDesktop,
+        { paddingBottom: desktopShell ? 34 : Math.max(132, insets.bottom + 118) },
+      ]}
     >
       {children}
     </ScrollView>
@@ -1819,8 +1863,6 @@ function DashboardScreen({
   onOpenModule: (module: SecurityModule) => void;
 }) {
   const { colors } = useDeltexTheme();
-  const { user } = useAuthContext();
-  const { profile } = useProfile();
   const { currentPlan, effectivePlan } = useSubscription();
   const protection = useProtection();
   const plan = PLANS.find((item) => item.id === effectivePlan) || PLANS[0];
@@ -1880,27 +1922,6 @@ function DashboardScreen({
 
   return (
     <ScrollScreen>
-      <View style={[styles.railwayTopNav, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <BrandLogo compact />
-        <View style={styles.railwayNavLinks}>
-          {['Product', 'Developers', 'Enterprise', 'Pricing'].map((item) => (
-            <Text key={item} style={[styles.railwayNavLink, { color: colors.textMuted }]}>
-              {item}
-            </Text>
-          ))}
-        </View>
-        <View style={styles.railwayNavActions}>
-          <OutlineButton label="Scan" onPress={refreshSecurityScore} icon={RefreshCw} color={colors.primary} />
-          <Pressable onPress={() => onNavigate('profile')} style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            {profile?.photoUri ? (
-              <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} />
-            ) : (
-              <Text style={styles.avatarText}>{(profile?.displayName || user?.name || 'DA').slice(0, 2).toUpperCase()}</Text>
-            )}
-          </Pressable>
-        </View>
-      </View>
-
       {refreshing ? (
         <Card style={styles.refreshCard}>
           <View style={styles.refreshRow}>
@@ -4599,6 +4620,159 @@ function BillingScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
+function AppSidebar({ screen, onNavigate }: { screen: AppScreen; onNavigate: (screen: AppScreen) => void }) {
+  const { colors } = useDeltexTheme();
+  const auth = useAuthContext();
+  const { profile } = useProfile();
+  const { effectivePlan, getTokenAllowance } = useSubscription();
+  const plan = PLANS.find((item) => item.id === effectivePlan) || PLANS[0];
+  const protectedCount = MODULES.filter((module) => isModuleAccessible(module, effectivePlan)).length;
+  const initials = (profile?.displayName || auth.user?.name || 'Deltex AI')
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  const renderNavItem = (item: { screen: AppScreen; label: string; icon: IconComponent }) => {
+    const Icon = item.icon;
+    const active = screen === item.screen || (screen === 'module' && item.screen === 'protection');
+
+    return (
+      <Pressable
+        key={item.screen}
+        onPress={() => onNavigate(item.screen)}
+        style={[
+          styles.sidebarNavItem,
+          {
+            backgroundColor: active ? PRIMARY_BUTTON : 'transparent',
+            borderColor: active ? PRIMARY_BUTTON : 'transparent',
+          },
+        ]}
+      >
+        <Icon size={18} color={active ? '#ffffff' : colors.textSubtle} />
+        <Text style={[styles.sidebarNavLabel, { color: active ? '#ffffff' : colors.text }]}>{item.label}</Text>
+      </Pressable>
+    );
+  };
+
+  return (
+    <View style={[styles.appSidebar, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={styles.sidebarBrandBlock}>
+        <BrandLogo compact />
+        <View style={[styles.sidebarLivePill, { backgroundColor: hexWithAlpha(colors.success, '12'), borderColor: hexWithAlpha(colors.success, '44') }]}>
+          <View style={[styles.sidebarLiveDot, { backgroundColor: colors.success }]} />
+          <Text style={[styles.sidebarLiveText, { color: colors.success }]}>Live workspace</Text>
+        </View>
+      </View>
+
+      <View style={styles.sidebarSection}>
+        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Workspace</Text>
+        {navItems.map(renderNavItem)}
+      </View>
+
+      <View style={styles.sidebarSection}>
+        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Manage</Text>
+        {sidebarManageItems.map(renderNavItem)}
+      </View>
+
+      <View style={styles.sidebarSpacer} />
+
+      <Pressable onPress={() => onNavigate('profile')} style={[styles.sidebarProfileCard, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+        <View style={[styles.sidebarAvatar, { backgroundColor: PRIMARY_BUTTON }]}>
+          {profile?.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.sidebarAvatarImage} /> : <Text style={styles.sidebarAvatarText}>{initials}</Text>}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.sidebarProfileName, { color: colors.text }]} numberOfLines={1}>
+            {profile?.displayName || auth.user?.name || 'Deltex User'}
+          </Text>
+          <Text style={[styles.sidebarProfileEmail, { color: colors.textMuted }]} numberOfLines={1}>
+            {profile?.email || auth.user?.email || 'Local account'}
+          </Text>
+        </View>
+      </Pressable>
+
+      <View style={[styles.sidebarPlanCard, { backgroundColor: hexWithAlpha(plan.color, '10'), borderColor: hexWithAlpha(plan.color, '44') }]}>
+        <View style={styles.sidebarPlanTop}>
+          <Crown size={17} color={plan.color} />
+          <Text style={[styles.sidebarPlanName, { color: plan.color }]}>{plan.name}</Text>
+        </View>
+        <Text style={[styles.sidebarPlanCopy, { color: colors.textMuted }]}>
+          {protectedCount}/{MODULES.length} protections available
+        </Text>
+        <Text style={[styles.sidebarPlanCopy, { color: colors.textMuted }]}>
+          {getTokenAllowance().toLocaleString()} AI tokens this cycle
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function AppShellHeader({ screen, onNavigate }: { screen: AppScreen; onNavigate: (screen: AppScreen) => void }) {
+  const { colors } = useDeltexTheme();
+  const { width } = useWindowDimensions();
+  const auth = useAuthContext();
+  const { profile } = useProfile();
+  const { effectivePlan } = useSubscription();
+  const protection = useProtection();
+  const plan = PLANS.find((item) => item.id === effectivePlan) || PLANS[0];
+  const activeAlerts = protection.alerts.filter((alert) => !alert.acknowledged).length;
+  const titleMap: Record<AppScreen, { title: string; subtitle: string }> = {
+    dashboard: { title: 'Security Dashboard', subtitle: 'Live posture, trends, scans, and recommendations' },
+    protection: { title: 'Protection Modules', subtitle: 'Configure, scan, monitor, and validate every shield' },
+    assistant: { title: 'AI Assistant', subtitle: 'Dedicated investigation workspace' },
+    alerts: { title: 'Alerts', subtitle: 'Risks that need review or guardian approval' },
+    profile: { title: 'Profile', subtitle: 'Account, preferences, identity, and protection status' },
+    settings: { title: 'Settings', subtitle: 'Security preferences and platform controls' },
+    subscriptions: { title: 'Plans', subtitle: 'Upgrade access and unlock protection capacity' },
+    billing: { title: 'Billing', subtitle: 'Invoices, payment methods, and renewal details' },
+    tokens: { title: 'Security Tokens', subtitle: 'AI operations, deep scans, and monthly allowances' },
+    schedule: { title: 'Scheduling', subtitle: 'Automated scans, monitoring windows, and recurring tasks' },
+    referrals: { title: 'Referrals', subtitle: 'Rewards and shared protection credits' },
+    module: { title: 'Module Console', subtitle: 'View findings, configure rules, and run validation' },
+  };
+  const title = titleMap[screen] || titleMap.dashboard;
+  const initials = (profile?.displayName || auth.user?.name || 'DA').slice(0, 2).toUpperCase();
+  const showSearch = width >= 1180;
+  const showPlan = width >= 1040;
+
+  return (
+    <View style={[styles.appTopbar, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={styles.appTopbarTitleBlock}>
+        <Text style={[styles.appTopbarTitle, { color: colors.text }]}>{title.title}</Text>
+        <Text style={[styles.appTopbarSubtitle, { color: colors.textMuted }]}>{title.subtitle}</Text>
+      </View>
+
+      {showSearch ? (
+        <View style={[styles.appTopbarSearch, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+          <Search size={16} color={colors.textSubtle} />
+          <Text style={[styles.appTopbarSearchText, { color: colors.textMuted }]}>Search protections, reports, alerts</Text>
+        </View>
+      ) : null}
+
+      <Pressable onPress={() => onNavigate('alerts')} style={[styles.topbarIconButton, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
+        <Bell size={18} color={activeAlerts ? colors.warning : colors.textMuted} />
+        {activeAlerts ? (
+          <View style={[styles.topbarAlertBadge, { backgroundColor: colors.warning }]}>
+            <Text style={styles.topbarAlertText}>{Math.min(9, activeAlerts)}</Text>
+          </View>
+        ) : null}
+      </Pressable>
+
+      {showPlan ? (
+        <Pressable onPress={() => onNavigate('subscriptions')} style={[styles.topbarPlanPill, { backgroundColor: hexWithAlpha(plan.color, '12'), borderColor: hexWithAlpha(plan.color, '44') }]}>
+          <Crown size={15} color={plan.color} />
+          <Text style={[styles.topbarPlanText, { color: plan.color }]}>{plan.name}</Text>
+        </Pressable>
+      ) : null}
+
+      <Pressable onPress={() => onNavigate('profile')} style={[styles.avatar, { backgroundColor: PRIMARY_BUTTON }]}>
+        {profile?.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{initials}</Text>}
+      </Pressable>
+    </View>
+  );
+}
+
 function BottomNavigation({ screen, onNavigate }: { screen: AppScreen; onNavigate: (screen: AppScreen) => void }) {
   const { colors } = useDeltexTheme();
   const insets = useSafeAreaInsets();
@@ -4648,7 +4822,9 @@ export default function DeltexSecurityApp() {
   const [selectedModule, setSelectedModule] = useState<SecurityModule>(MODULES[0]);
   const [needsSetup, setNeedsSetup] = useState(false);
 
+  const useSidebarShell = width >= 920;
   const maxWidth = width >= 1100 ? 1120 : width >= 840 ? 860 : undefined;
+  const appMaxWidth = useSidebarShell ? Math.min(Math.max(width - 32, 920), 1480) : maxWidth;
   const visibleStage: FlowStage =
     !hasAcceptedConsent && stage !== 'splash'
       ? 'onboarding'
@@ -4736,9 +4912,21 @@ export default function DeltexSecurityApp() {
 
   return (
     <CyberBackground variant={screen === 'assistant' ? 'purple' : 'cyan'}>
-      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { maxWidth }]}>
-        <View style={styles.appContent}>{renderAppScreen()}</View>
-        {screen === 'assistant' ? null : <BottomNavigation screen={screen} onNavigate={setScreen} />}
+      <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { maxWidth: appMaxWidth }]}>
+        {useSidebarShell ? (
+          <View style={styles.appShell}>
+            <AppSidebar screen={screen} onNavigate={setScreen} />
+            <View style={[styles.appMainPanel, { backgroundColor: colors.backgroundSoft, borderColor: colors.border }]}>
+              {screen === 'assistant' ? null : <AppShellHeader screen={screen} onNavigate={setScreen} />}
+              <View style={styles.appContent}>{renderAppScreen()}</View>
+            </View>
+          </View>
+        ) : (
+          <>
+            <View style={styles.appContent}>{renderAppScreen()}</View>
+            {screen === 'assistant' ? null : <BottomNavigation screen={screen} onNavigate={setScreen} />}
+          </>
+        )}
       </SafeAreaView>
     </CyberBackground>
   );
@@ -4784,6 +4972,210 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
   },
+  appShell: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 14,
+    padding: 12,
+  },
+  appSidebar: {
+    width: 268,
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 12,
+  },
+  appMainPanel: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  sidebarBrandBlock: {
+    gap: 12,
+    padding: 6,
+    marginBottom: 14,
+  },
+  sidebarLivePill: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  sidebarLiveDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 7,
+  },
+  sidebarLiveText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  sidebarSection: {
+    gap: 5,
+    marginBottom: 16,
+  },
+  sidebarSectionLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    paddingHorizontal: 10,
+    marginBottom: 4,
+  },
+  sidebarNavItem: {
+    minHeight: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 11,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  sidebarNavLabel: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  sidebarSpacer: {
+    flex: 1,
+    minHeight: 14,
+  },
+  sidebarProfileCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  sidebarAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  sidebarAvatarImage: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+  },
+  sidebarAvatarText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  sidebarProfileName: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  sidebarProfileEmail: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  sidebarPlanCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+  },
+  sidebarPlanTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 7,
+  },
+  sidebarPlanName: {
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  sidebarPlanCopy: {
+    fontSize: 10,
+    lineHeight: 15,
+    fontWeight: '600',
+  },
+  appTopbar: {
+    minHeight: 68,
+    borderBottomWidth: 1,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  appTopbarTitleBlock: {
+    flex: 1,
+    minWidth: 190,
+  },
+  appTopbarTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: -0.4,
+  },
+  appTopbarSubtitle: {
+    fontSize: 11,
+    lineHeight: 16,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  appTopbarSearch: {
+    flexBasis: 300,
+    maxWidth: 360,
+    minHeight: 40,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+  },
+  appTopbarSearchText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  topbarIconButton: {
+    width: 40,
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topbarAlertBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 17,
+    height: 17,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  topbarAlertText: {
+    color: '#111111',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+  topbarPlanPill: {
+    minHeight: 40,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  topbarPlanText: {
+    fontSize: 11,
+    fontWeight: '900',
+  },
   fullScreen: {
     flex: 1,
     alignItems: 'center',
@@ -4801,6 +5193,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 14,
     paddingBottom: 116,
+  },
+  scrollContentDesktop: {
+    paddingHorizontal: 20,
+    paddingTop: 18,
   },
   card: {
     borderWidth: 1,
@@ -4858,35 +5254,35 @@ const styles = StyleSheet.create({
     borderRadius: 7,
   },
   gradientButton: {
-    minHeight: 46,
-    borderRadius: 12,
+    minHeight: 48,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 9,
-    paddingHorizontal: 14,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
   },
   gradientButtonText: {
-    color: '#050505',
-    fontSize: 12,
-    fontWeight: '900',
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   outlineButton: {
-    minHeight: 38,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 11,
+    minHeight: 48,
+    borderRadius: 8,
+    borderWidth: 0,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 8,
   },
   outlineButtonText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.4,
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   skipButton: {
     alignSelf: 'flex-end',
@@ -5201,7 +5597,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   avatarText: {
-    color: '#050505',
+    color: '#ffffff',
     fontWeight: '900',
   },
   avatarImage: {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '@/hooks/use-auth';
 import { Link } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
@@ -22,12 +22,22 @@ export default function LoginForm() {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
+  const [signOutLoading, setSignOutLoading] = useState(false);
+
+  async function handleSignOut() {
+    setSignOutLoading(true);
+    try {
+      await Promise.resolve(signOut());
+    } finally {
+      setSignOutLoading(false);
+    }
+  }
 
   if (loading) {
     return (
       <View style={styles.container}>
         <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color="#000" />
+          <ActivityIndicator size="large" color="#2563eb" />
           <Text style={styles.loadingText}>Verifying access</Text>
         </View>
       </View>
@@ -42,9 +52,13 @@ export default function LoginForm() {
             <Text style={styles.successTitle}>Access Verified</Text>
             <Text style={styles.successEmail}>{user.email}</Text>
           </View>
-          <TouchableOpacity style={styles.button} onPress={signOut}>
-            <Text style={styles.buttonText}>Sign Out</Text>
-          </TouchableOpacity>
+          <Pressable
+            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed, signOutLoading && styles.buttonDisabled]}
+            onPress={handleSignOut}
+            disabled={signOutLoading}
+          >
+            {signOutLoading ? <ActivityIndicator color="#ffffff" size="small" /> : <Text style={styles.buttonText}>Sign Out</Text>}
+          </Pressable>
           <Link href="/" style={styles.link}>
             <Text style={styles.linkText}>Return to Dashboard</Text>
           </Link>
@@ -103,15 +117,15 @@ export default function LoginForm() {
           />
         </View>
 
-        <TouchableOpacity
-          style={[
+        <Pressable
+          style={({ pressed }) => [
             styles.button,
             (localLoading || !email) && styles.buttonDisabled,
             styles.primaryButton,
+            pressed && styles.buttonPressed,
           ]}
           onPress={handleSubmit}
           disabled={localLoading || !email}
-          activeOpacity={0.8}
         >
           <View style={styles.buttonContent}>
             {localLoading ? (
@@ -120,25 +134,25 @@ export default function LoginForm() {
               <Text style={styles.buttonText}>Continue</Text>
             )}
           </View>
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={styles.divider} />
 
-        <TouchableOpacity
-          style={[
+        <Pressable
+          style={({ pressed }) => [
             styles.button,
             styles.secondaryButton,
             localLoading && styles.buttonDisabled,
+            pressed && styles.buttonPressed,
           ]}
           onPress={handleGoogle}
           disabled={localLoading}
-          activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel="Continue with Google"
         >
           <View style={styles.socialButtonContent}>
             {localLoading ? (
-              <ActivityIndicator color="#000" size="small" />
+              <ActivityIndicator color="#ffffff" size="small" />
             ) : (
               <>
                 <GoogleGlyph />
@@ -146,7 +160,7 @@ export default function LoginForm() {
               </>
             )}
           </View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <View style={styles.footer}>
@@ -221,19 +235,24 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
+    backgroundColor: '#2563eb',
   },
   primaryButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#2563eb',
   },
   secondaryButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1.5,
-    borderColor: '#000',
+    backgroundColor: '#2563eb',
+    borderWidth: 0,
+    borderColor: '#2563eb',
+  },
+  buttonPressed: {
+    backgroundColor: '#1d4ed8',
   },
   buttonContent: {
     alignItems: 'center',
@@ -247,13 +266,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontWeight: '700',
-    fontSize: 15,
+    fontWeight: '600',
+    fontSize: 16,
   },
   secondaryButtonText: {
-    color: '#000',
-    fontWeight: '700',
-    fontSize: 15,
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 16,
   },
   buttonDisabled: {
     opacity: 0.5,
