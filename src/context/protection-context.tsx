@@ -1,10 +1,10 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import * as BackgroundTask from 'expo-background-task';
-import * as SecureStore from 'expo-secure-store';
 import * as TaskManager from 'expo-task-manager';
 
 import { MODULES, SecurityModuleId, SecurityStatus } from '@/constants/security-platform';
+import { getLocalJsonItem, setLocalJsonItem } from '@/utils/local-json-store';
 import {
   CHILD_SAFETY_SCENARIOS,
   DASHBOARD_TREND_SEEDS,
@@ -321,24 +321,11 @@ function defaultState(): ProtectionState {
 }
 
 async function getStoredState() {
-  if (Platform.OS === 'web') {
-    return typeof localStorage === 'undefined' ? null : localStorage.getItem(STORE_KEY);
-  }
-
-  return SecureStore.getItemAsync(STORE_KEY);
+  return getLocalJsonItem(STORE_KEY);
 }
 
 async function setStoredState(state: ProtectionState) {
-  const value = JSON.stringify(state);
-
-  if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(STORE_KEY, value);
-    }
-    return;
-  }
-
-  await SecureStore.setItemAsync(STORE_KEY, value);
+  await setLocalJsonItem(STORE_KEY, JSON.stringify(state));
 }
 
 function mergeStoredState(stored: ProtectionState): ProtectionState {

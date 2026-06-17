@@ -1,8 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 
 import { FEATURE_ACCESS, PLAN_RANK, PLANS, PlanId } from '@/constants/security-platform';
+import { getLocalJsonItem, setLocalJsonItem } from '@/utils/local-json-store';
 
 export type EntitlementFeatureId =
   | 'security-score'
@@ -341,24 +340,11 @@ function rankEffectivePlan(currentPlan: PlanId, trial: TrialBoost | null) {
 }
 
 async function getStoredState() {
-  if (Platform.OS === 'web') {
-    return typeof localStorage === 'undefined' ? null : localStorage.getItem(PLAN_KEY);
-  }
-
-  return SecureStore.getItemAsync(PLAN_KEY);
+  return getLocalJsonItem(PLAN_KEY);
 }
 
 async function setStoredState(state: SubscriptionState) {
-  const value = JSON.stringify(state);
-
-  if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(PLAN_KEY, value);
-    }
-    return;
-  }
-
-  await SecureStore.setItemAsync(PLAN_KEY, value);
+  await setLocalJsonItem(PLAN_KEY, JSON.stringify(state));
 }
 
 function normalizeStoredState(stored: string | null): SubscriptionState {

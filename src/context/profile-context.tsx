@@ -1,9 +1,9 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
-import * as SecureStore from 'expo-secure-store';
 
 import { AuthProviderName, DeltexUser, useAuthContext } from '@/context/auth-context';
+import { getLocalJsonItem, setLocalJsonItem } from '@/utils/local-json-store';
 
 export interface EmergencyContact {
   id: string;
@@ -102,27 +102,12 @@ function profileKey(userId: string) {
 }
 
 async function getStoredProfile(userId: string) {
-  const key = profileKey(userId);
-
-  if (Platform.OS === 'web') {
-    return typeof localStorage === 'undefined' ? null : localStorage.getItem(key);
-  }
-
-  return SecureStore.getItemAsync(key);
+  return getLocalJsonItem(profileKey(userId));
 }
 
 async function setStoredProfile(profile: UserProfile) {
   const key = profileKey(profile.userId);
-  const value = JSON.stringify(profile);
-
-  if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(key, value);
-    }
-    return;
-  }
-
-  await SecureStore.setItemAsync(key, value);
+  await setLocalJsonItem(key, JSON.stringify(profile));
 }
 
 function createProfileFromAuth(user: DeltexUser): UserProfile {

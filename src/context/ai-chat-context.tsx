@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+
+import { getLocalJsonItem, setLocalJsonItem } from '@/utils/local-json-store';
 
 export interface AiChatResult {
   trustScore: number;
@@ -73,24 +73,11 @@ function titleFromMessages(messages: AiChatMessage[]) {
 }
 
 async function getStoredHistory() {
-  if (Platform.OS === 'web') {
-    return typeof localStorage === 'undefined' ? null : localStorage.getItem(STORE_KEY);
-  }
-
-  return SecureStore.getItemAsync(STORE_KEY);
+  return getLocalJsonItem(STORE_KEY);
 }
 
 async function setStoredHistory(conversations: AiChatConversation[], activeConversationId: string) {
-  const value = JSON.stringify({ conversations, activeConversationId });
-
-  if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(STORE_KEY, value);
-    }
-    return;
-  }
-
-  await SecureStore.setItemAsync(STORE_KEY, value);
+  await setLocalJsonItem(STORE_KEY, JSON.stringify({ conversations, activeConversationId }));
 }
 
 const AiChatContext = createContext<AiChatContextValue | null>(null);

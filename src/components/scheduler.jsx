@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { getLocalJsonItem, setLocalJsonItem } from '@/utils/local-json-store';
 
 const STORE_KEY = 'demo_schedule_v1';
 
@@ -14,7 +14,7 @@ export default function Scheduler() {
 
   useEffect(() => {
     (async () => {
-      const raw = await SecureStore.getItemAsync(STORE_KEY);
+      const raw = await getLocalJsonItem(STORE_KEY);
       if (raw) {
         try {
           setItems(JSON.parse(raw));
@@ -27,7 +27,7 @@ export default function Scheduler() {
   }, []);
 
   async function persist(next) {
-    await SecureStore.setItemAsync(STORE_KEY, JSON.stringify(next));
+    await setLocalJsonItem(STORE_KEY, JSON.stringify(next));
   }
 
   async function addItem() {

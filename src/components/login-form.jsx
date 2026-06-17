@@ -57,7 +57,7 @@ export default function LoginForm() {
             onPress={handleSignOut}
             disabled={signOutLoading}
           >
-            {signOutLoading ? <ActivityIndicator color="#ffffff" size="small" /> : <Text style={styles.buttonText}>Sign Out</Text>}
+            {signOutLoading ? <ActivityIndicator color="#ffffff" size="small" /> : <Text style={styles.buttonText} numberOfLines={1}>Sign Out</Text>}
           </Pressable>
           <Link href="/" style={styles.link}>
             <Text style={styles.linkText}>Return to Dashboard</Text>
@@ -131,7 +131,7 @@ export default function LoginForm() {
             {localLoading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.buttonText}>Continue</Text>
+              <Text style={styles.buttonText} numberOfLines={1}>Continue</Text>
             )}
           </View>
         </Pressable>
@@ -156,7 +156,7 @@ export default function LoginForm() {
             ) : (
               <>
                 <GoogleGlyph />
-                <Text style={styles.secondaryButtonText}>Continue with Google</Text>
+                <Text style={styles.secondaryButtonText} numberOfLines={1}>Continue with Google</Text>
               </>
             )}
           </View>
@@ -209,11 +209,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   inputWrapper: {
     borderWidth: 1.5,
@@ -235,12 +232,12 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    paddingVertical: 9,
+    paddingHorizontal: 18,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 48,
+    minHeight: 42,
     backgroundColor: '#2563eb',
   },
   primaryButton: {
@@ -267,12 +264,18 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 13,
+    lineHeight: 17,
+    textAlign: 'center',
+    flexShrink: 1,
   },
   secondaryButtonText: {
     color: '#ffffff',
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 13,
+    lineHeight: 17,
+    textAlign: 'center',
+    flexShrink: 1,
   },
   buttonDisabled: {
     opacity: 0.5,
@@ -287,11 +290,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 28,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
   successHeader: {
     alignItems: 'center',

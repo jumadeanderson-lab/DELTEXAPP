@@ -1,9 +1,9 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Share } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { Share } from 'react-native';
 
 import { EntitlementFeatureId, RewardGrant, useSubscription } from '@/context/subscription-context';
 import { PlanId } from '@/constants/security-platform';
+import { getLocalJsonItem, setLocalJsonItem } from '@/utils/local-json-store';
 
 export type ReferralState = 'invited' | 'code-applied' | 'registered' | 'consent-accepted' | 'onboarding-complete' | 'installed' | 'verified' | 'rewarded' | 'rejected';
 
@@ -169,24 +169,11 @@ function createEvent(referralId: string, state: ReferralState, detail: string): 
 }
 
 async function getStoredState() {
-  if (Platform.OS === 'web') {
-    return typeof localStorage === 'undefined' ? null : localStorage.getItem(REFERRAL_KEY);
-  }
-
-  return SecureStore.getItemAsync(REFERRAL_KEY);
+  return getLocalJsonItem(REFERRAL_KEY);
 }
 
 async function setStoredState(state: ReferralRewardsState) {
-  const value = JSON.stringify(state);
-
-  if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(REFERRAL_KEY, value);
-    }
-    return;
-  }
-
-  await SecureStore.setItemAsync(REFERRAL_KEY, value);
+  await setLocalJsonItem(REFERRAL_KEY, JSON.stringify(state));
 }
 
 function canVerifyReferral(events: ReferralEvent[], referralId: string) {

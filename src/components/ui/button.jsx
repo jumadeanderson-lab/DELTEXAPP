@@ -50,7 +50,7 @@ export function Button({
         style,
       ]}
     >
-      {busy ? <ActivityIndicator color="#ffffff" size="small" /> : <ThemedText style={styles.buttonText}>{title}</ThemedText>}
+      {busy ? <ActivityIndicator color="#ffffff" size="small" /> : <ThemedText style={styles.buttonText} numberOfLines={1}>{title}</ThemedText>}
     </Pressable>
   );
 }
@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 8,
     flexDirection: 'row',
-    gap: 8,
+    gap: 7,
     borderWidth: 0,
-    minHeight: 48,
-    paddingHorizontal: 32,
-    paddingVertical: 12,
+    minHeight: 42,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
     ...Platform.select({
       web: {
         cursor: 'pointer',
@@ -82,6 +82,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: '600',
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 13,
+    lineHeight: 17,
+    flexShrink: 1,
   },
 });

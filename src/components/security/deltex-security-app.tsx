@@ -242,20 +242,20 @@ const moduleIcons: Record<SecurityModuleId, IconComponent> = {
 const categories: ModuleCategory[] = ['Core Defense', 'Identity & Social', 'Family & Web', 'Network', 'Privacy', 'AI Intelligence'];
 
 const navItems: { screen: AppScreen; label: string; icon: IconComponent }[] = [
-  { screen: 'dashboard', label: 'Home', icon: Home },
-  { screen: 'protection', label: 'Security', icon: ShieldCheck },
-  { screen: 'assistant', label: 'AI', icon: Brain },
+  { screen: 'dashboard', label: 'Overview', icon: Home },
+  { screen: 'protection', label: 'Protections', icon: ShieldCheck },
+  { screen: 'assistant', label: 'AI Chat', icon: Brain },
   { screen: 'alerts', label: 'Alerts', icon: Bell },
-  { screen: 'profile', label: 'Profile', icon: User },
+  { screen: 'profile', label: 'Account', icon: User },
 ];
 
 const sidebarManageItems: { screen: AppScreen; label: string; icon: IconComponent }[] = [
-  { screen: 'schedule', label: 'Schedules', icon: Calendar },
-  { screen: 'subscriptions', label: 'Plans', icon: Crown },
+  { screen: 'schedule', label: 'Scan Schedule', icon: Calendar },
+  { screen: 'subscriptions', label: 'Plan & Features', icon: Crown },
   { screen: 'billing', label: 'Billing', icon: CreditCard },
-  { screen: 'tokens', label: 'Tokens', icon: Database },
-  { screen: 'referrals', label: 'Referrals', icon: Star },
-  { screen: 'settings', label: 'Settings', icon: Settings },
+  { screen: 'tokens', label: 'AI Tokens', icon: Database },
+  { screen: 'referrals', label: 'Rewards', icon: Star },
+  { screen: 'settings', label: 'Preferences', icon: Settings },
 ];
 
 const FALLBACK_TIMEZONES = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Riyadh', 'Asia/Dubai', 'Asia/Singapore', 'Australia/Sydney'];
@@ -581,24 +581,12 @@ function formatAiPromptLimit(plan: PlanId) {
 function Card({
   children,
   style,
-  glow,
 }: {
   children: React.ReactNode;
   style?: object;
   glow?: string;
 }) {
   const { colors } = useDeltexTheme();
-  const shadowColor = glow || colors.shadow;
-  const shadowStyle =
-    Platform.OS === 'web'
-      ? ({ boxShadow: `0 10px 26px ${hexWithAlpha(colors.mode === 'dark' ? '#000000' : '#171714', colors.mode === 'dark' ? '44' : '16')}` } as object)
-      : ({
-          shadowColor,
-          shadowOpacity: 0.08,
-          shadowRadius: 14,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 2,
-        } as object);
 
   return (
     <View
@@ -608,7 +596,6 @@ function Card({
           backgroundColor: colors.card,
           borderColor: colors.border,
         },
-        shadowStyle,
         style,
       ]}
     >
@@ -667,8 +654,8 @@ function GradientButton({
     >
       {({ pressed }) => (
         <View style={[styles.gradientButton, { backgroundColor: pressed ? PRIMARY_BUTTON_PRESSED : PRIMARY_BUTTON }]}>
-          {spinning ? <ActivityIndicator size="small" color="#ffffff" /> : Icon ? <Icon size={18} color="#ffffff" strokeWidth={2.5} /> : null}
-          <Text style={styles.gradientButtonText}>{label}</Text>
+          {spinning ? <ActivityIndicator size="small" color="#ffffff" /> : Icon ? <Icon size={16} color="#ffffff" strokeWidth={2.5} /> : null}
+          <Text style={styles.gradientButtonText} numberOfLines={1}>{label}</Text>
         </View>
       )}
     </Pressable>
@@ -702,8 +689,8 @@ function OutlineButton({
         style,
       ]}
     >
-      {spinning ? <ActivityIndicator size="small" color="#ffffff" /> : Icon ? <Icon size={17} color="#ffffff" /> : null}
-      <Text style={styles.outlineButtonText}>{label}</Text>
+      {spinning ? <ActivityIndicator size="small" color="#ffffff" /> : Icon ? <Icon size={16} color="#ffffff" /> : null}
+      <Text style={styles.outlineButtonText} numberOfLines={1}>{label}</Text>
     </Pressable>
   );
 }
@@ -1913,12 +1900,46 @@ function DashboardScreen({
 
   const chartColor = chartMetric === 'threats' ? colors.danger : chartMetric === 'scans' ? colors.primary : chartMetric === 'risk' ? colors.warning : colors.purple;
   const chartSubtitle = chartMetric === 'threats'
-    ? 'Detected and blocked threats over time'
+    ? 'Threats found and blocked over time'
     : chartMetric === 'scans'
-      ? 'Completed scan and monitoring volume'
+      ? 'Completed scans and monitoring checks'
       : chartMetric === 'risk'
-        ? 'Risk pressure after recommendations and remediations'
-        : 'Security events across modules';
+        ? 'Risk level after fixes and recommendations'
+        : 'Security events from your protections';
+  const quickActions = [
+    {
+      title: 'Protect my device',
+      detail: 'Run malware, file, and device safety checks.',
+      action: 'Run device check',
+      icon: Smartphone,
+      color: colors.primary,
+      onPress: () => onOpenModule(MODULES.find((module) => module.id === 'malware') || MODULES[0]),
+    },
+    {
+      title: 'Protect my family',
+      detail: 'Set child rules, review risks, and create reports.',
+      action: 'Open family safety',
+      icon: Users,
+      color: colors.success,
+      onPress: () => onOpenModule(MODULES.find((module) => module.id === 'family-safety') || MODULES[0]),
+    },
+    {
+      title: 'Protect a website',
+      detail: 'Add a site, scan it, and watch for changes.',
+      action: 'Add website',
+      icon: Globe,
+      color: colors.accent,
+      onPress: () => onOpenModule(MODULES.find((module) => module.id === 'website-protection') || MODULES[0]),
+    },
+    {
+      title: 'Ask Deltex AI',
+      detail: 'Get help understanding alerts or suspicious activity.',
+      action: 'Open AI chat',
+      icon: Brain,
+      color: colors.purple,
+      onPress: () => onNavigate('assistant'),
+    },
+  ];
 
   return (
     <ScrollScreen>
@@ -1939,31 +1960,31 @@ function DashboardScreen({
         <View style={styles.railwayHeroGrid}>
           <View style={styles.railwayHeroCopy}>
             <View style={[styles.railwayHeroBadge, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
-              <Text style={[styles.railwayHeroBadgeText, { color: colors.primary }]}>Deltex AI platform</Text>
+              <Text style={[styles.railwayHeroBadgeText, { color: colors.primary }]}>Simple security overview</Text>
             </View>
-            <Text style={[styles.railwayHeroTitle, { color: colors.text }]}>Ship security peacefully</Text>
+            <Text style={[styles.railwayHeroTitle, { color: colors.text }]}>Your protection, in one place</Text>
             <Text style={[styles.railwayHeroSubtitle, { color: colors.textMuted }]}>
-              Deploy family safety, website protection, identity monitoring, malware defense, and AI investigations from one clean command center.
+              Check your score, turn on protections, monitor family safety, scan websites, and review alerts from one clean workspace.
             </Text>
             <View style={styles.heroActions}>
-              <GradientButton label="Deploy Protection" onPress={refreshSecurityScore} icon={ShieldCheck} style={styles.heroAction} />
-              <OutlineButton label="View Dashboard" onPress={() => onNavigate('protection')} icon={ArrowRight} color={colors.text} style={styles.heroAction} />
+              <GradientButton label="Run Security Check" onPress={refreshSecurityScore} icon={ShieldCheck} style={styles.heroAction} />
+              <OutlineButton label="Choose Protections" onPress={() => onNavigate('protection')} icon={ArrowRight} color={colors.text} style={styles.heroAction} />
             </View>
           </View>
           <View style={[styles.railwayProjectPanel, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <View style={styles.railwayPanelHeader}>
               <View>
-                <Text style={[styles.railwayPanelTitle, { color: colors.text }]}>Deltex production</Text>
-                <Text style={[styles.railwayPanelMeta, { color: colors.textMuted }]}>Healthy deployment</Text>
+                <Text style={[styles.railwayPanelTitle, { color: colors.text }]}>Protection summary</Text>
+                <Text style={[styles.railwayPanelMeta, { color: colors.textMuted }]}>Status today</Text>
               </View>
               <ScoreRing score={securityScore.score} color={colors.primary} size={78} />
             </View>
             {[
-              { label: 'Deploy', value: 'Protections active', color: colors.primary },
-              { label: 'Network', value: 'Threat routes watched', color: colors.success },
-              { label: 'Scale', value: `${securityScore.filesScanned} files scanned`, color: colors.purple },
-              { label: 'Monitor', value: `${securityScore.blockedThreats} blocked`, color: colors.warning },
-              { label: 'Evolve', value: securityScore.trend, color: colors.accent },
+              { label: 'Status', value: `${securityScore.activeShields} protections available`, color: colors.primary },
+              { label: 'Device', value: `${securityScore.filesScanned} files scanned`, color: colors.success },
+              { label: 'Alerts', value: `${securityScore.activeIssues} need review`, color: colors.warning },
+              { label: 'Blocked', value: `${securityScore.blockedThreats} stopped`, color: colors.purple },
+              { label: 'Plan', value: plan.name, color: colors.accent },
             ].map((row) => (
               <View key={row.label} style={[styles.railwayDeployRow, { borderTopColor: colors.border }]}>
                 <View style={[styles.railwayDeployDot, { backgroundColor: row.color }]} />
@@ -1975,12 +1996,35 @@ function DashboardScreen({
         </View>
       </LinearGradient>
 
+      <SectionHeader title="Start here" subtitle="Choose the area you want to protect first." />
+      <View style={styles.quickActionGrid}>
+        {quickActions.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <Pressable key={item.title} onPress={item.onPress} style={styles.quickActionPressable}>
+              <Card style={styles.quickActionCard} glow={item.color}>
+                <View style={[styles.quickActionIcon, { backgroundColor: hexWithAlpha(item.color, '16') }]}>
+                  <Icon size={20} color={item.color} />
+                </View>
+                <Text style={[styles.quickActionTitle, { color: colors.text }]}>{item.title}</Text>
+                <Text style={[styles.quickActionCopy, { color: colors.textMuted }]}>{item.detail}</Text>
+                <View style={styles.quickActionFooter}>
+                  <Text style={[styles.quickActionText, { color: item.color }]}>{item.action}</Text>
+                  <ArrowRight size={14} color={item.color} />
+                </View>
+              </Card>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <SecurityScoreCard model={securityScore} onRefresh={refreshSecurityScore} />
 
       <PlanAccessCard onUpgrade={() => onNavigate('subscriptions')} />
       <TokenWalletCard onManage={() => onNavigate('tokens')} />
 
-      <SectionHeader title="Protection ecosystem" subtitle="Family safety, social media, websites, and personal firewall controls" action="Security Hub" onAction={() => onNavigate('protection')} />
+      <SectionHeader title="Protect what matters" subtitle="Family, social accounts, websites, firewall, and biometric safety." action="All protections" onAction={() => onNavigate('protection')} />
       <View style={styles.moduleGrid}>
         {ecosystemModules.map((module) => (
           <ModuleCard key={module.id} module={module} onPress={() => onOpenModule(module)} compact />
@@ -2013,7 +2057,7 @@ function DashboardScreen({
 
       <SecurityScoreAnalyticsCard model={securityScore} />
 
-      <SectionHeader title="Security activity trends" subtitle={chartSubtitle} />
+      <SectionHeader title="Activity over time" subtitle={chartSubtitle} />
       <Card>
         <SegmentedControl<DashboardTrendRange>
           value={protection.dashboard.range}
@@ -2043,14 +2087,14 @@ function DashboardScreen({
         />
       </Card>
 
-      <SectionHeader title="Protection modules" subtitle="Coverage for malware, scams, identity, privacy, and AI threats" action="View all" onAction={() => onNavigate('protection')} />
+      <SectionHeader title="All protections" subtitle="Malware, scams, identity, privacy, network, family, web, and AI safety." action="View all" onAction={() => onNavigate('protection')} />
       <View style={styles.moduleGrid}>
         {topModules.map((module) => (
           <ModuleCard key={module.id} module={module} onPress={() => onOpenModule(module)} compact />
         ))}
       </View>
 
-      <SectionHeader title="Recent threat intelligence" action="Alerts" onAction={() => onNavigate('alerts')} />
+      <SectionHeader title="Recent alerts" action="View alerts" onAction={() => onNavigate('alerts')} />
       <Card>
         {RECENT_THREATS.map((threat, index) => {
           const color = severityColor(threat.severity, colors);
@@ -2130,23 +2174,23 @@ function ProtectionHubScreen({ onOpenModule }: { onOpenModule: (module: Security
 
   return (
     <ScrollScreen>
-      <ScreenHeader title="Security Hub" subtitle="Figma-aligned command center for detection, recommendations, and plan-scaled protections." />
+      <ScreenHeader title="Protections" subtitle="Choose what you want to protect, then configure rules, schedules, scans, and alerts." />
       <LinearGradient colors={[colors.card, colors.cardAlt]} style={[styles.coverageHero, { borderColor: colors.border }]}>
         <View style={styles.coverageHeroTop}>
           <View>
-            <Text style={[styles.heroEyebrow, { color: colors.accent }]}>Security Hub</Text>
-            <Text style={[styles.coverageHeroTitle, { color: colors.text }]}>{MODULES.length} protections mapped</Text>
+            <Text style={[styles.heroEyebrow, { color: colors.accent }]}>Protection center</Text>
+            <Text style={[styles.coverageHeroTitle, { color: colors.text }]}>{MODULES.length} ways to stay safer</Text>
           </View>
           <View style={[styles.coverageScoreBadge, { backgroundColor: hexWithAlpha(colors.accent, '14'), borderColor: hexWithAlpha(colors.accent, '55') }]}>
             <Text style={[styles.coverageScoreText, { color: colors.accent }]}>{protectedCount}/{MODULES.length}</Text>
           </View>
         </View>
         <Text style={[styles.coverageHeroCopy, { color: colors.textMuted }]}>
-          Known exposure, family safety risk, social deception, website posture, suspicious links, identity abuse, privacy leakage, firewall actions, and AI-specific attacks are grouped into one monitoring view.
+          Device threats, identity risk, family safety, websites, social accounts, privacy, network security, and AI threats are grouped so each area is easier to find and manage.
         </Text>
       </LinearGradient>
 
-      <SectionHeader title="Vulnerability coverage" subtitle="From the research report: scan, anomaly, playbook, secrets, segmentation, rollback, and model validation controls." />
+      <SectionHeader title="Protection coverage" subtitle="A quick view of the main risk areas Deltex can monitor." />
       <View style={styles.coverageGrid}>
         {vulnerabilityCoverage.map((item) => {
           const Icon = item.icon;
@@ -2165,7 +2209,7 @@ function ProtectionHubScreen({ onOpenModule }: { onOpenModule: (module: Security
         })}
       </View>
 
-      <SectionHeader title="Recommended controls" subtitle="Scaled from RESEARCH1.md and deep-research-report.md: start with visibility, identity, recovery, then AI and enterprise guardrails." />
+      <SectionHeader title="Recommended first steps" subtitle="Start with the controls that reduce the most common risks." />
       <View style={styles.researchGrid}>
         {RESEARCH_SECURITY_RECOMMENDATIONS.map((item) => {
           const Icon = item.icon;
@@ -4667,12 +4711,12 @@ function AppSidebar({ screen, onNavigate }: { screen: AppScreen; onNavigate: (sc
       </View>
 
       <View style={styles.sidebarSection}>
-        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Workspace</Text>
+        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Main</Text>
         {navItems.map(renderNavItem)}
       </View>
 
       <View style={styles.sidebarSection}>
-        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Manage</Text>
+        <Text style={[styles.sidebarSectionLabel, { color: colors.textSubtle }]}>Account & Tools</Text>
         {sidebarManageItems.map(renderNavItem)}
       </View>
 
@@ -4718,18 +4762,18 @@ function AppShellHeader({ screen, onNavigate }: { screen: AppScreen; onNavigate:
   const plan = PLANS.find((item) => item.id === effectivePlan) || PLANS[0];
   const activeAlerts = protection.alerts.filter((alert) => !alert.acknowledged).length;
   const titleMap: Record<AppScreen, { title: string; subtitle: string }> = {
-    dashboard: { title: 'Security Dashboard', subtitle: 'Live posture, trends, scans, and recommendations' },
-    protection: { title: 'Protection Modules', subtitle: 'Configure, scan, monitor, and validate every shield' },
-    assistant: { title: 'AI Assistant', subtitle: 'Dedicated investigation workspace' },
-    alerts: { title: 'Alerts', subtitle: 'Risks that need review or guardian approval' },
-    profile: { title: 'Profile', subtitle: 'Account, preferences, identity, and protection status' },
-    settings: { title: 'Settings', subtitle: 'Security preferences and platform controls' },
-    subscriptions: { title: 'Plans', subtitle: 'Upgrade access and unlock protection capacity' },
-    billing: { title: 'Billing', subtitle: 'Invoices, payment methods, and renewal details' },
-    tokens: { title: 'Security Tokens', subtitle: 'AI operations, deep scans, and monthly allowances' },
-    schedule: { title: 'Scheduling', subtitle: 'Automated scans, monitoring windows, and recurring tasks' },
-    referrals: { title: 'Referrals', subtitle: 'Rewards and shared protection credits' },
-    module: { title: 'Module Console', subtitle: 'View findings, configure rules, and run validation' },
+    dashboard: { title: 'Overview', subtitle: 'Your security score, alerts, scans, and next steps' },
+    protection: { title: 'Protections', subtitle: 'Turn protections on, configure rules, and run scans' },
+    assistant: { title: 'AI Chat', subtitle: 'Ask questions, review risks, and investigate suspicious activity' },
+    alerts: { title: 'Alerts & Reports', subtitle: 'Items that need review, plus generated safety reports' },
+    profile: { title: 'Account', subtitle: 'Profile, plan, preferences, and protection status' },
+    settings: { title: 'Preferences', subtitle: 'Security, privacy, AI data, and notification controls' },
+    subscriptions: { title: 'Plan & Features', subtitle: 'See what is active and unlock more protections' },
+    billing: { title: 'Billing', subtitle: 'Payment method, invoices, and renewal details' },
+    tokens: { title: 'AI Tokens', subtitle: 'Usage for deep scans, reports, and investigations' },
+    schedule: { title: 'Scan Schedule', subtitle: 'Automated scans, monitoring windows, and reminders' },
+    referrals: { title: 'Rewards', subtitle: 'Referral bonuses and shared protection credits' },
+    module: { title: 'Protection Details', subtitle: 'Review findings, adjust settings, and run validation' },
   };
   const title = titleMap[screen] || titleMap.dashboard;
   const initials = (profile?.displayName || auth.user?.name || 'DA').slice(0, 2).toUpperCase();
@@ -4746,7 +4790,7 @@ function AppShellHeader({ screen, onNavigate }: { screen: AppScreen; onNavigate:
       {showSearch ? (
         <View style={[styles.appTopbarSearch, { backgroundColor: colors.surfaceStrong, borderColor: colors.border }]}>
           <Search size={16} color={colors.textSubtle} />
-          <Text style={[styles.appTopbarSearchText, { color: colors.textMuted }]}>Search protections, reports, alerts</Text>
+          <Text style={[styles.appTopbarSearchText, { color: colors.textMuted }]}>Search protections, alerts, settings</Text>
         </View>
       ) : null}
 
@@ -4800,11 +4844,9 @@ function BottomNavigation({ screen, onNavigate }: { screen: AppScreen; onNavigat
 function CyberBackground({ children, variant = 'cyan' }: { children: React.ReactNode; variant?: 'cyan' | 'purple' }) {
   const { colors } = useDeltexTheme();
   const finalStop = variant === 'purple' ? colors.cardAlt : colors.backgroundSoft;
-  const noPointerEvents = { pointerEvents: 'none' as const };
 
   return (
     <LinearGradient colors={[colors.background, colors.background, finalStop]} style={styles.appGradient}>
-      <View style={[styles.bgGrid, noPointerEvents, { borderColor: colors.border }]} />
       {children}
     </LinearGradient>
   );
@@ -4916,7 +4958,7 @@ export default function DeltexSecurityApp() {
         {useSidebarShell ? (
           <View style={styles.appShell}>
             <AppSidebar screen={screen} onNavigate={setScreen} />
-            <View style={[styles.appMainPanel, { backgroundColor: colors.backgroundSoft, borderColor: colors.border }]}>
+            <View style={styles.appMainPanel}>
               {screen === 'assistant' ? null : <AppShellHeader screen={screen} onNavigate={setScreen} />}
               <View style={styles.appContent}>{renderAppScreen()}</View>
             </View>
@@ -4986,9 +5028,7 @@ const styles = StyleSheet.create({
   },
   appMainPanel: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 20,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   sidebarBrandBlock: {
     gap: 12,
@@ -5254,35 +5294,43 @@ const styles = StyleSheet.create({
     borderRadius: 7,
   },
   gradientButton: {
-    minHeight: 48,
+    minHeight: 42,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    gap: 9,
-    paddingHorizontal: 32,
-    paddingVertical: 12,
+    gap: 7,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    alignSelf: 'stretch',
   },
   gradientButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
+    lineHeight: 17,
+    textAlign: 'center',
+    flexShrink: 1,
   },
   outlineButton: {
-    minHeight: 48,
+    minHeight: 42,
     borderRadius: 8,
     borderWidth: 0,
-    paddingHorizontal: 32,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: 7,
+    alignSelf: 'stretch',
   },
   outlineButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
+    lineHeight: 17,
+    textAlign: 'center',
+    flexShrink: 1,
   },
   skipButton: {
     alignSelf: 'flex-end',
@@ -5722,6 +5770,49 @@ const styles = StyleSheet.create({
   },
   heroAction: {
     flex: 1,
+  },
+  quickActionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 6,
+  },
+  quickActionPressable: {
+    flexGrow: 1,
+    flexBasis: 230,
+  },
+  quickActionCard: {
+    minHeight: 154,
+    marginBottom: 0,
+  },
+  quickActionIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  quickActionTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    marginBottom: 6,
+  },
+  quickActionCopy: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  quickActionFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  quickActionText: {
+    fontSize: 11,
+    fontWeight: '900',
   },
   ringContainer: {
     alignItems: 'center',
